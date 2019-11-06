@@ -1,0 +1,72 @@
+mailclient:
+
+  connection:
+
+    #SMTPUser: "info"
+    SMTPUser: "XXX@outlook.com"
+
+    #SMTPServer: "smtp.gmail.com"
+    SMTPServer: "smtp.office365.com"
+
+    SMTPPort: 587
+    #SMTPPort: 465
+    TLS: "yes"
+
+  message:
+
+    Subject: "Here you go."
+    ## Some providers, namely MSFT does not like to relay arbitrary emails.
+    ## Make sure the "From" is your@outlook.com
+    ## Or you get: `554 5.2.0 STOREDRV.Submission.Exception:SendAsDeniedException.MapiExceptionSendAsDenied`
+
+    ## Google/Gmail is still ok with the following:
+    #From: "Joe B <info@xxx.org>"
+
+    ## Gather Marks from CSV import
+    ## This is the most common use of the marks:
+    To: "campaign1/db/deepsea.db"
+
+    ## However, you could send a direct one-off email:
+    #To: "xxxx@gmail.com"
+
+    #mark:
+    #  FirstName: "First"
+    #  LastName: "Last"
+    #  Identifier: "345345sdfsdf"
+
+    ## We would like the email messages to have access to additional metadata
+    template-data:
+      # This directive is used to construct `URLCustom` property exposed in the templates
+      # In previous example http://evil.com/Identifier/file is {{URLTop}}/{{IdentifierRegex Result}}
+      URLTop: "https://xxx.com"
+
+    headers:
+      Return-Receipt-To: "info@xxxx.com"
+      Disposition-Notification-To: "info@xxxx.com"
+      List-Unsubscribe: "<https://www.xxxx.com/unsubscribe?u=876>, <mailto:info@xxxx.com?subject=unsubscribe>"
+      List-Unsubscribe-Post: "List-Unsubscribe=One-Click"
+
+    body:
+      # Templated HTML / TEXT multipart delivery
+      # Templates can substitute dynamic vartiables (See. Template Section for details).
+      html: "campaign1/message.htpl"
+      text: "campaign1/message.ttpl"
+
+    attach:
+      - "/tmp/evil_report.pdf"
+    embed:
+      - "campaign1/artifacts/logo_header.png"
+      - "campaign1/artifacts/logo_footer.png"
+
+##
+## Storage module
+##
+storage:
+  DBFile: "campaign1/campaign.db"
+  load:
+    SourceFile: "campaign1/marks.csv"
+    ## Identifiers are used to track marks across the campaign. Identifiers can be of any format, as long as you can carry them in URLs as resources. For example, the URL: http://evil.com/Identifier/file can track access to a hosted payload. You could generate your own Identifiers in the CSV file. Or, you can talk DeepSea to generate unique Identifiers for each mark based on a Regex pattern. You would then need to place "<dynamic>" in place of identifier field in CSV, and use `IdentifierRegex` directive to notify the program the format of the Identifier you want to generate. If for some reason custom generation of Identifiers fail, you will get a 8 Int rand string
+
+    IdentifierRegex: "^[a-z0-9]{8}$"
+  query:
+    DBTask: "showmarks
