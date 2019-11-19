@@ -1,5 +1,6 @@
 ### Build tool
 
+```sh
 cd ~/go/src/
 export GOPATH=~/go
 
@@ -8,15 +9,20 @@ cd deepsea
 
 go get 
 go build -o deepsea main.go
+```
 
 ### Setup campaigns workspace
+
+```sh
 mkdir -p campaigns/campaign1
 cp conf/.deepsea.yaml  campaigns/campaign/campaign1.yaml
 cd campaigns/campaign1
+```
 
 ### Workspace tasks
-- edit campaign.yaml
+- edit `campaign.yaml`
 
+```yaml
 mailclient:
 
   connection:
@@ -78,21 +84,23 @@ storage:
 
 - edit marks.csv
 
-```
+```csv
 ident,email,firstname,lastname
 <dynamic>,user@gmail.com,,
 ```
 
 #### Load Marks
 - create database 
-```
+
+```sh
 ../../deepsea  --config ./campaign.yaml  storage query -d ./campaign.db -t createtable
 Using config file: ./campaign1.yaml
 2019/11/18 13:16:16 Task: createtable
 2019/11/18 13:16:16 Creating Marks table
 ```
 - load marks from CSV 
-```
+
+```sh
 ../../deepsea  --config ./campaign.yaml  storage load -d ./campaign.db -s ./marks.csv
 Using config file: ./campaign.yaml
 2019/11/18 13:21:11 Dropping table Mark if exists
@@ -108,7 +116,7 @@ vobi97v7, user@gmail.com, , .
 ```
 - you can verify the marks are loaded
 
-```
+```sh
 ../../deepsea  --config ./campaign.yaml  storage query -d ./campaign.db -t showmarks
 Using config file: ./campaign.yaml
 2019/11/18 13:22:17 Task: showmarks
@@ -126,17 +134,21 @@ vobi97v7, user@gmail.com, , .
 - write content
  
 - 1. Inline CSS (if needed)
-```
+
+```sh
 ../../tools/dsh2inline message.html message.htpl
 ```
+
 - 2. Create a TXT verson from the HTML version
-```
+
+```sh
 ../../tools/dsh2t message.htpl message.ttpl
 ```
 
 #### Mail Campaign
 Note: We ask for interactive password on the email provider account for now.
-```
+
+```sh
 ../../deepsea mailclient --config ./campaign.yaml 
 
 Using config file: ./campaign.yaml
@@ -164,7 +176,7 @@ Emailing: user@gmail.com [id:vobi97v7]
 If you need to run campaign to a test emails, you can reload test marks.
 For that, just recycle the data in the marks table like so:
 
-``` 
+```sh
 ../../deepsea  --config ./campaign.yaml storage query -t recycletable
 Using config file: ./campaign.yaml
 2019/11/18 18:39:17 Task: recycletable
@@ -172,7 +184,7 @@ Using config file: ./campaign.yaml
 2019/11/18 18:39:17 Creating Marks table
 ```
 
-```
+```sh
 ../../deepsea  --config ./campaign.yaml storage query showmarks
 Using config file: ./campaign.yaml
 2019/11/18 18:39:24 Task: showmarks
