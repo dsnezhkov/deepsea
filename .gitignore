@@ -12,7 +12,4 @@
 *.out
 .idea
 .c3*
-deepsea
 db/
-campaigns/
-tools/samples

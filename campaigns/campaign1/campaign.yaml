@@ -1,0 +1,51 @@
+mailclient:
+
+  connection:
+
+    SMTPUser: "drtkn@outlook.com"
+    SMTPServer: "smtp.office365.com"
+    SMTPPort: 587
+    TLS: "yes"
+
+  message:
+
+    Subject: "Here you go."
+    ## Some providers, namely MSFT does not like to relay arbitrary emails.
+    ## Make sure the "From" is your@outlook.com
+    ## Or you get: `554 5.2.0 STOREDRV.Submission.Exception:SendAsDeniedException.MapiExceptionSendAsDenied`
+
+    From: "drtkn@outlook.com"
+    To: "campaign.db"
+
+    ## We would like the email messages to have access to additional metadata
+    template-data:
+      # This directive is used to construct `URLCustom` property exposed in the templates
+      # In previous example http://evil.com/Identifier/file is {{URLTop}}/{{IdentifierRegex Result}}
+      URLTop: "https://example.com"
+
+    headers:
+      Return-Receipt-To: "drtkn@outlook.com"
+      Disposition-Notification-To: "drtkn@outlook.com"
+      List-Unsubscribe: "<https://www.microsoft.com/unsubscribe?u=876>, <mailto:drtkn@outlook.com?subject=unsubscribe>"
+      List-Unsubscribe-Post: "List-Unsubscribe=One-Click"
+
+    body:
+      # Templated HTML / TEXT multipart delivery
+      # Templates can substitute dynamic vartiables (See. Template Section for details).
+      html: "message.htpl"
+      text: "message.ttpl"
+
+    attach:
+    embed:
+
+##
+## Storage module
+##
+storage:
+  DBFile: "campaign.db"
+  load:
+    SourceFile: "marks.csv"
+
+    IdentifierRegex: "^[a-z0-9]{8}$"
+  query:
+    DBTask: "showmarks"
