@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/dsnezhkov/deepsea/cmd"
+import "deepsea/cmd"
 
 func main() {
 	cmd.Execute()

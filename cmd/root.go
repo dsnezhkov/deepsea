@@ -27,8 +27,8 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "DeepSea",
-	Short: "Red Team insider phishing tooling",
-	Long:  ` ROOT: Longer Description here...`,
+	Short: "Red Team phishing gear",
+	Long:  ` ROOT: see //dsnezhkov.github.io/deepsea...`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("... Deep Sea ...")
 	},

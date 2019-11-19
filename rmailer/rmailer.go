@@ -3,8 +3,8 @@ package rmailer
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/dsnezhkov/deepsea/global"
-	"gopkg.in/gomail.v2"
+	"deepsea/global"
+	gomail "github.com/gophish/gomail"
 	thtml "html/template"
 	ttext "html/template"
 	"io"
@@ -83,17 +83,18 @@ func GenMail(username string, password string, server string, port int,
 			fmt.Println("File Not Found: ", file)
 		}
 	}
+    fmt.Println(m)
 	dialSend(m, server, port, username, password, usetls)
 }
 
 func dialSend(m *gomail.Message, server string, port int, username string, password string, usetls string) {
 
+	fmt.Println(m)
 	d := gomail.NewDialer(server, port, username, password)
 	if strings.ToLower(usetls) == "yes" {
 		d.TLSConfig = &tls.Config{InsecureSkipVerify: true} // no idea who we are connecting. relax
 	}
 
-	// _, _ = m.WriteTo(os.Stdout)
 	if err := d.DialAndSend(m); err != nil {
 		fmt.Printf("ERROR: Could not dial and send: %v", err)
 	}

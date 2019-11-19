@@ -24,8 +24,8 @@ import (
 	"time"
 	"upper.io/db.v3/ql"
 
-	"github.com/dsnezhkov/deepsea/global"
-	"github.com/dsnezhkov/deepsea/rmailer"
+	"deepsea/global"
+	"deepsea/rmailer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -218,6 +218,7 @@ func mailDriver(cmd *cobra.Command, args []string) {
 		invokeRmail(&tdata)
 	}
 
+    fmt.Println(viper.GetString("mailclient.message.To"))
 	// Marks in CSV file
 	if global.DBFileRe.MatchString(viper.GetString("mailclient.message.To")) {
 		var marks []global.Mark
@@ -246,7 +247,7 @@ func mailDriver(cmd *cobra.Command, args []string) {
 		}
 
 		// Printing to stdout.
-		log.Printf("Printing Marks\n")
+		log.Printf("-= Marks =-\n")
 		for _, mark := range marks {
 			fmt.Printf("Emailing: %s [id:%s] - %s %s\n",
 				mark.Email,

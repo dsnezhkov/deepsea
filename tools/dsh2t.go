@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 
-
 	"jaytaylor.com/html2text"
 )
 

@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/dsnezhkov/deepsea/global"
+	"deepsea/global"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"

@@ -1,6 +1,6 @@
 package rmailer
 
-import "github.com/dsnezhkov/deepsea/global"
+import "deepsea/global"
 
 type TemplateData struct {
 	URLTop          string
