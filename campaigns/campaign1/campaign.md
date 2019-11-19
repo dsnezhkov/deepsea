@@ -80,7 +80,7 @@ storage:
 
 ```
 ident,email,firstname,lastname
-<dynamic>,dsnezhkov@gmail.com,,
+<dynamic>,user@gmail.com,,
 ```
 
 #### Load Marks
@@ -104,7 +104,7 @@ Using config file: ./campaign.yaml
 2019/11/18 13:21:11 Getting all results
 2019/11/18 13:21:11 Printing Marks
 
-vobi97v7, dsnezhkov@gmail.com, , .
+vobi97v7, user@gmail.com, , .
 ```
 - you can verify the marks are loaded
 
@@ -115,7 +115,7 @@ Using config file: ./campaign.yaml
 2019/11/18 13:22:17 Querying for result : find()
 
 -= Table: Marks =-
-vobi97v7, dsnezhkov@gmail.com, , .
+vobi97v7, user@gmail.com, , .
 ```
 
 
@@ -157,7 +157,7 @@ Enter Password:
 2019/11/18 18:14:18 Querying for result : find()
 2019/11/18 18:14:18 Getting all results
 2019/11/18 18:14:18 -= Marks =-
-Emailing: dsnezhkov@gmail.com [id:vobi97v7] 
+Emailing: user@gmail.com [id:vobi97v7] 
 ```
 
 ### Testing
