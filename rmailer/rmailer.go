@@ -2,12 +2,13 @@ package rmailer
 
 import (
 	"crypto/tls"
-	"fmt"
 	"deepsea/global"
+	"fmt"
 	gomail "github.com/gophish/gomail"
 	thtml "html/template"
 	ttext "html/template"
 	"io"
+	"log"
 	"path/filepath"
 	"strings"
 )
@@ -34,7 +35,7 @@ func GenMail(username string, password string, server string, port int,
 	}
 
 	// Create a Message-Id:
-	msg_id := strings.Join([]string{ global.RandString(16), server}, "@")
+	msg_id := strings.Join([]string{global.RandString(16), server}, "@")
 	m.SetHeader("Message-ID", "<"+msg_id+">")
 
 	// Templates HTML/Text
@@ -71,6 +72,7 @@ func GenMail(username string, password string, server string, port int,
 		return tt.Execute(w, tdata)
 	})
 	m.AddAlternativeWriter("text/html", func(w io.Writer) error {
+		log.Printf("Tdata: %#v", tdata)
 		return th.Execute(w, tdata)
 	})
 
@@ -80,10 +82,10 @@ func GenMail(username string, password string, server string, port int,
 		if global.FileExists(file) {
 			m.Attach(file)
 		} else {
-			fmt.Println("File Not Found: ", file)
+			log.Fatalf("Attachment File Not Found: %s\n", file)
 		}
 	}
-    fmt.Println(m)
+
 	dialSend(m, server, port, username, password, usetls)
 }
 
@@ -92,7 +94,7 @@ func dialSend(m *gomail.Message, server string, port int, username string, passw
 	fmt.Println(m)
 	d := gomail.NewDialer(server, port, username, password)
 	if strings.ToLower(usetls) == "yes" {
-		d.TLSConfig = &tls.Config{InsecureSkipVerify: true} // no idea who we are connecting. relax
+		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
 	if err := d.DialAndSend(m); err != nil {

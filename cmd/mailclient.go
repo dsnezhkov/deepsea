@@ -183,9 +183,30 @@ func mailDriver(cmd *cobra.Command, args []string) {
 	Embeds = viper.GetStringSlice("mailclient.message.embed")
 
 	// Additional Exposed Template Metadata
-	tdata.URLTop = viper.GetString("mailclient.message.template-data.URLTop")
+	// tdata.URLTop = viper.GetString("mailclient.message.template-data.URLTop")
+
+	log.Println("Setting up template data")
+	staticTmplData := viper.GetStringMapString(
+		"mailclient.message.template-data")
+	log.Printf("staticTmplData %#v Len:%d\n", staticTmplData, len(staticTmplData))
+	if len(staticTmplData) != 0 {
+		if _, found := staticTmplData["dictionary"]; found {
+			log.Printf("Dictionary key found\n")
+			kvDict := viper.GetStringMapString(
+				"mailclient.message.template-data.Dictionary")
+			log.Printf("Dict: %#v\n", kvDict)
+
+			// fmt.Println(kvDict)
+			tdata.Dictionary = map[string]string{}
+			for k, v := range kvDict {
+				tdata.Dictionary[k] = v
+				log.Printf("Dict KEY: %s : %s", k, v)
+			}
+		}
+	}
 
 	// Debug
+	fmt.Printf("-= Connection Parameters =-")
 	fmt.Printf("SMTP Server : %s\n", SMTPServer)
 	fmt.Printf("SMTP Port   : %d\n", SMTPPort)
 	fmt.Printf("SMTP User : %s\n", SMTPUser)
@@ -208,6 +229,7 @@ func mailDriver(cmd *cobra.Command, args []string) {
 
 	// Direct email, compose Mark and send
 	if global.EmailRe.MatchString(To) {
+		log.Printf("Mark is diredctly in the config. \n")
 		var mark global.Mark
 		mark.Firstname = viper.GetString("mailclient.message.mark.firstname")
 		mark.Lastname = viper.GetString("mailclient.message.mark.lastname")
@@ -218,8 +240,9 @@ func mailDriver(cmd *cobra.Command, args []string) {
 		invokeRmail(&tdata)
 	}
 
-    fmt.Println(viper.GetString("mailclient.message.To"))
+	fmt.Println(viper.GetString("mailclient.message.To"))
 	// Marks in CSV file
+	log.Printf("Marks in the database. \n")
 	if global.DBFileRe.MatchString(viper.GetString("mailclient.message.To")) {
 		var marks []global.Mark
 

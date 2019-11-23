@@ -2,14 +2,18 @@ package global
 
 import (
 	"bufio"
+	"encoding/base64"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"github.com/lucasjones/reggen"
 	"io"
+	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -78,4 +82,28 @@ func RandString(len int) string {
 	}
 
 	return s
+}
+
+func GetContentFromFileStr(fPath string) string {
+	return string(GetContentFromFile(fPath))
+}
+
+func GetContentFromFile(fPath string) []byte {
+	if len(fPath) == 0 {
+		log.Fatalf("Empty path submitted")
+	}
+	input, err := ioutil.ReadFile(fPath)
+	if err != nil {
+		log.Fatalf("File Error: %s : %s\n", fPath, err)
+	}
+	return input
+}
+
+func GetLogoFromFile(logoPath string) string {
+
+	var logoDataCID []string
+	logoDataCID = append(logoDataCID, "data:image/png;base64,")
+	logoData := base64.StdEncoding.EncodeToString(GetContentFromFile(logoPath))
+
+	return strings.Join(append(logoDataCID, logoData), "")
 }

@@ -3,7 +3,7 @@ package rmailer
 import "deepsea/global"
 
 type TemplateData struct {
-	URLTop          string
-	EmbedImage      []string
-	Mark			*global.Mark
+	EmbedImage []string
+	Mark       *global.Mark
+	Dictionary map[string]string
 }
