@@ -28,7 +28,7 @@ func CSV2Json(mfile string) ([]byte, error) {
 
 	csvFile, err := os.Open(mfile)
 	if err != nil {
-		fmt.Printf("ERROR: CSV File: %s %v\n", mfile, err)
+		log.Printf("[Error] CSV File: %s %v\n", mfile, err)
 		return nil, err
 	}
 
@@ -99,7 +99,9 @@ func GetContentFromFile(fPath string) []byte {
 	return input
 }
 
-func GetLogoFromFile(logoPath string) string {
+// ImgToBase64 creates a Base64 embeddable `data:` string from an image file
+// It returns the image string
+func ImgToBase64(logoPath string) string {
 
 	var logoDataCID []string
 	logoDataCID = append(logoDataCID, "data:image/png;base64,")

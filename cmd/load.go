@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 
@@ -42,47 +41,65 @@ var loadCmd = &cobra.Command{
 
 func init() {
 
-	loadCmd.Flags().StringVarP(&DBFile, "DBFile", "d",
-		"", "Path to QL DB file")
-	loadCmd.Flags().StringVarP(&SourceFile, "SourceFile", "s",
-		"", "Path to Source of marks file")
-	loadCmd.Flags().StringVarP(&IdentifierRegex, "IdentifierRegex", "r",
-		"", "<dynamic> RegEx pattern")
+	loadCmd.Flags().StringVarP(&DBFile,
+		"DBFile",
+		"d",
+		"",
+		"Path to QL DB file")
+
+	loadCmd.Flags().StringVarP(
+		&SourceFile,
+		"SourceFile",
+		"s",
+		"",
+		"Path to Source of marks file")
+
+	loadCmd.Flags().StringVarP(
+		&IdentifierRegex,
+		"IdentifierRegex",
+		"r",
+		"",
+		"<dynamic> RegEx pattern")
 
 	if err = viper.BindPFlag(
-		"storage.DBFile", storageCmd.Flags().Lookup("DBFile")); err != nil {
+		"storage.DBFile",
+		storageCmd.Flags().Lookup("DBFile")); err != nil {
 		_ = storageCmd.Help()
 		os.Exit(2)
 	}
+
 	if err = viper.BindPFlag(
-		"storage.load.SourceFile", loadCmd.Flags().Lookup("SourceFile")); err != nil {
+		"storage.load.SourceFile",
+		loadCmd.Flags().Lookup("SourceFile")); err != nil {
 		_ = loadCmd.Help()
 		os.Exit(2)
 	}
 	if err = viper.BindPFlag(
-		"storage.load.IdentifierRegex", loadCmd.Flags().Lookup("IdentifierRegex")); err != nil {
+		"storage.load.IdentifierRegex",
+		loadCmd.Flags().Lookup("IdentifierRegex")); err != nil {
 		_ = loadCmd.Help()
 		os.Exit(2)
 	}
+
 	storageCmd.AddCommand(loadCmd)
 }
 
 func loadDriver(cmd *cobra.Command, args []string) {
 
 	var settings = ql.ConnectionURL{
-		Database: viper.GetString("storage.DBFile"), // Path to database file.
+		Database: viper.GetString("storage.DBFile"),
 	}
-	// Attemping to open the "example.db" database file.
+
 	sess, err := ql.Open(settings)
 	if err != nil {
 		log.Fatalf("db.Open(): %q\n", err)
 	}
-	defer sess.Close() // Remember to close the database session.
+	defer sess.Close()
 
 	// Option A: Remove Mark table
-	log.Printf("Dropping table Mark if exists\n")
+	log.Printf("[Info] Dropping table Mark if exists\n")
 	_, err = sess.Exec(`DROP TABLE IF EXISTS mark`)
-	log.Printf("Creating Marks table\n")
+	log.Printf("[Info] Creating Marks table\n")
 	_, err = sess.Exec(`CREATE TABLE mark ( 
 			identifier string, 
 			email string,
@@ -91,34 +108,37 @@ func loadDriver(cmd *cobra.Command, args []string) {
 
 	// Option B: Truncate Mark table data
 	// Pointing to the "mark" table.
-	log.Printf("Pointing to mark table \n")
+	log.Printf("[Info] Selecting the mark table \n")
 	markCollection := sess.Collection("mark")
 
 	// Attempt to remove existing rows (if any).
-	log.Printf("Removing existing rows if any \n")
+	log.Printf("[Info] Removing existing rows if any \n")
 	err = markCollection.Truncate()
 	if err != nil {
-		log.Printf("Truncate(): %q\n", err)
+		log.Printf("[Error] Truncate(): %q\n", err)
 	}
 
 	// Marks in CSV file
-	if global.CSVFileRe.MatchString(viper.GetString("storage.load.SourceFile")) {
+	if global.CSVFileRe.MatchString(
+		viper.GetString("storage.load.SourceFile")) {
 		var marks []global.Mark
 
-		marksJson, err := global.CSV2Json(viper.GetString("storage.load.SourceFile"))
+		marksJson, err := global.CSV2Json(
+			viper.GetString("storage.load.SourceFile"))
 		if err != nil {
-			fmt.Printf("ERROR: Could not parse CSV %v", err)
+			log.Printf("[Error] Could not parse CSV %v", err)
 			os.Exit(3)
 		}
 		//fmt.Println(string(marksJson))
 
 		err = json.Unmarshal(marksJson, &marks)
 		if err != nil {
-			fmt.Println("JSON Unmarshal error:", err)
+			log.Println("[Error] JSON Unmarshal error:", err)
 			os.Exit(2)
 		}
 
 		for k := range marks {
+
 			// TODO: Preprocess rules
 			if marks[k].Identifier == "<dynamic>" {
 				// Regex generate
@@ -141,23 +161,21 @@ func loadDriver(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	// Let's query for the results we've just inserted.
-	log.Printf("Querying for result : find()\n")
+	// Query for the results we've just inserted.
 	res := markCollection.Find()
 
 	// Query all results and fill the mark variable with them.
 	var marks []global.Mark
 
-	log.Printf("Getting all results\n")
 	err = res.All(&marks)
 	if err != nil {
-		log.Fatalf("res.All(): %q\n", err)
+		log.Fatalf("[Error] res.All(): %q\n", err)
 	}
 
 	// Printing to stdout.
-	log.Printf("Printing Marks\n")
+	log.Printf("[Info] -= Marks =-\n")
 	for _, mark := range marks {
-		fmt.Printf("%s, %s, %s, %s.\n",
+		log.Printf("%s, %s, %s, %s.\n",
 			mark.Identifier,
 			mark.Email,
 			mark.Firstname,

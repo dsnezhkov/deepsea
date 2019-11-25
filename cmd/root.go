@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -31,25 +32,20 @@ var rootCmd = &cobra.Command{
 	Long:  ` ROOT: see //dsnezhkov.github.io/deepsea...`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("... Deep Sea ...")
+
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalf("[Error] cobra.Command: %v\n", err)
 	}
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (no default)")
+	rootCmd.PersistentFlags().StringVar(
+		&cfgFile, "config", "", "config file (required)")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -59,22 +55,20 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 		viper.SetConfigType("yaml")
 	} else {
-		fmt.Println("I don't know what you want to do. ")
-		fmt.Println("Also, there is no config file. See help ")
+		log.Printf("[Error]: Config file not provided")
 		if err := rootCmd.Help(); err != nil {
 			fmt.Print("Error executing help")
 			os.Exit(2)
 		}
 		os.Exit(1)
-
 	}
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		log.Println("[Info] Using config file:", viper.ConfigFileUsed())
 	} else {
-		fmt.Printf("Config File Error: %v\n", err)
+		log.Printf("[Error] Config File Use Error: %v\n", err)
 		os.Exit(2)
 	}
 }

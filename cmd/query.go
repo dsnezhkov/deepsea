@@ -15,8 +15,8 @@
 package cmd
 
 import (
-	"fmt"
 	"deepsea/global"
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
@@ -56,18 +56,30 @@ func init() {
 		optDBTaskMapKeys = append(optDBTaskMapKeys, key)
 	}
 
-	queryCmd.Flags().StringVarP(&DBFile, "DBFile", "d",
-		"", "Path to QL DB file")
-	queryCmd.Flags().StringVarP(&DBTask, "DBTask", "t",
-		"", "Tasks to run: \n"+strings.Join(optDBTaskMapKeys, "\n"))
+	queryCmd.Flags().StringVarP(
+		&DBFile,
+		"DBFile",
+		"d",
+		"",
+		"Path to QL DB file")
+
+	queryCmd.Flags().StringVarP(
+		&DBTask,
+		"DBTask",
+		"t",
+		"",
+		"Tasks to run: \n"+strings.Join(optDBTaskMapKeys, "\n"))
 
 	if err = viper.BindPFlag(
-		"storage.DBFile", queryCmd.Flags().Lookup("DBFile")); err != nil {
+		"storage.DBFile",
+		queryCmd.Flags().Lookup("DBFile")); err != nil {
 		_ = queryCmd.Help()
 		os.Exit(2)
 	}
+
 	if err = viper.BindPFlag(
-		"storage.query.DBTask", queryCmd.Flags().Lookup("DBTask")); err != nil {
+		"storage.query.DBTask",
+		queryCmd.Flags().Lookup("DBTask")); err != nil {
 		_ = queryCmd.Help()
 		os.Exit(2)
 	}
@@ -82,12 +94,12 @@ func queryDriver(cmd *cobra.Command, args []string) {
 	}
 
 	var settings = ql.ConnectionURL{
-		Database: viper.GetString("storage.DBFile"), // Path to database file.
+		Database: viper.GetString("storage.DBFile"),
 	}
 
 	sess, err := ql.Open(settings)
 	if err != nil {
-		log.Fatalf("db.Open(): %q\n", err)
+		log.Fatalf("[Error] db.Open(): %q\n", err)
 	}
 	defer sess.Close() // Remember to close the database session.
 
@@ -95,7 +107,8 @@ func queryDriver(cmd *cobra.Command, args []string) {
 
 	dt := viper.GetString("storage.query.DBTask")
 	if val, ok := optDBTaskMap[dt]; ok {
-		log.Printf("Task: %s", dt)
+		log.Printf("[Info] Task: %s", dt)
+
 		// Convert string to a function call:
 		val.(func(database sqlbuilder.Database, collection db.Collection))(
 			sess, markCollection.(db.Collection))
@@ -107,8 +120,8 @@ func queryDriver(cmd *cobra.Command, args []string) {
 }
 
 func qShowMarks(sess sqlbuilder.Database, markCollection db.Collection) {
-	// Let's query for the results we've just inserted.
-	log.Printf("Querying for result : find()\n")
+	// Query for the results we've just inserted.
+	log.Printf("[Info] Querying for result : find()\n")
 	res := markCollection.Find()
 
 	// Query all results and fill the mark variable with them.
@@ -116,11 +129,11 @@ func qShowMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 
 	err = res.All(&marks)
 	if err != nil {
-		log.Fatalf("res.All(): %q\n", err)
+		log.Fatalf("[Error] res.All(): %q\n", err)
 	}
 
 	// Printing to stdout.
-	fmt.Printf("-= Table: Marks =-\n")
+	log.Printf("[Info] -= Table: Marks =-\n")
 	for _, mark := range marks {
 		fmt.Printf("%s, %s, %s, %s.\n",
 			mark.Identifier,
@@ -132,24 +145,27 @@ func qShowMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 }
 
 func qTruncateMarks(sess sqlbuilder.Database, markCollection db.Collection) {
-	log.Printf("Removing existing rows (if any) \n")
+	log.Printf("[Info] Removing existing rows (if any) \n")
 	err = markCollection.Truncate()
 	if err != nil {
-		log.Printf("Truncate(): %q\n", err)
+		log.Printf("[Error] Truncate(): %q\n", err)
 	}
 }
+
 func qDropMarks(sess sqlbuilder.Database, markCollection db.Collection) {
-	log.Printf("Dropping table Mark if exists\n")
+	log.Printf("[Info] Dropping table Mark if exists\n")
 	_, err = sess.Exec(`DROP TABLE IF EXISTS mark`)
 }
+
 func qCreateMarks(sess sqlbuilder.Database, markCollection db.Collection) {
-	log.Printf("Creating Marks table\n")
+	log.Printf("[Info] Creating Marks table\n")
 	_, err = sess.Exec(`CREATE TABLE mark (
 			identifier string,
 			email string,
 			firstname string,
 			lastname string )`)
 }
+
 func qRecycleMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 	qDropMarks(sess, markCollection)
 	qCreateMarks(sess, markCollection)

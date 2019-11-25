@@ -3,7 +3,7 @@ package rmailer
 import (
 	"crypto/tls"
 	"deepsea/global"
-	"fmt"
+	"errors"
 	gomail "github.com/gophish/gomail"
 	thtml "html/template"
 	ttext "html/template"
@@ -13,14 +13,20 @@ import (
 	"strings"
 )
 
-func GenMail(username string, password string, server string, port int,
-	usetls string, from string, subject string,
-	bodyTextTemplate string, bodyHtmlTemplate string, attachments []string,
-	embeds []string, headers map[string]string, tdata *TemplateData) {
+func GenMail(
+	server string,
+	from string,
+	subject string,
+	bodyTextTemplate string,
+	bodyHtmlTemplate string,
+	attachments []string,
+	embeds []string,
+	headers map[string]string,
+	tdata *TemplateData) (*gomail.Message, error)  {
 
 	var err error
 
-	fmt.Printf("Identifier: %s | Email: %s | First Name: %s | Last Name: %s\n",
+	log.Printf("[Debug] Identifier: %s | Email: %s | First Name: %s | Last Name: %s\n",
 		tdata.Mark.Identifier, tdata.Mark.Email,
 		tdata.Mark.Firstname, tdata.Mark.Lastname)
 
@@ -35,19 +41,17 @@ func GenMail(username string, password string, server string, port int,
 	}
 
 	// Create a Message-Id:
-	msg_id := strings.Join([]string{global.RandString(16), server}, "@")
-	m.SetHeader("Message-ID", "<"+msg_id+">")
+	msgId := strings.Join([]string{global.RandString(16), server}, "@")
+	m.SetHeader("Message-ID", "<"+msgId+">")
 
 	// Templates HTML/Text
 	th, err := thtml.ParseFiles(bodyHtmlTemplate)
 	if err != nil {
-		fmt.Printf("ERROR: HTML Template not parsed %v\n", err)
-		return
+		return new(gomail.Message), err
 	}
 	tt, err := ttext.ParseFiles(bodyTextTemplate)
 	if err != nil {
-		fmt.Printf("ERROR: Text Template not parsed %v\n", err)
-		return
+		return new(gomail.Message), err
 	}
 
 	// Embedded images
@@ -55,13 +59,14 @@ func GenMail(username string, password string, server string, port int,
 	if l != 0 {
 		tdata.EmbedImage = make([]string, l)
 		for ix, file := range embeds {
-			fmt.Println("Embedding: ", file)
+			log.Println("[Info] Embedding: ", file)
 
 			if global.FileExists(file) {
 				m.Embed(file)
 				tdata.EmbedImage[ix] = filepath.Base(file)
 			} else {
-				fmt.Println("File Not Found: ", file)
+				return new(gomail.Message),
+				errors.New("Embedded File Not Found: " + file)
 			}
 		}
 	}
@@ -72,32 +77,32 @@ func GenMail(username string, password string, server string, port int,
 		return tt.Execute(w, tdata)
 	})
 	m.AddAlternativeWriter("text/html", func(w io.Writer) error {
-		log.Printf("Tdata: %#v", tdata)
 		return th.Execute(w, tdata)
 	})
 
 	// Attachments
 	for _, file := range attachments {
-		fmt.Println("Attaching: ", file)
+		log.Println("[Info] Attaching asset : ", file)
 		if global.FileExists(file) {
 			m.Attach(file)
 		} else {
-			log.Fatalf("Attachment File Not Found: %s\n", file)
+			return new(gomail.Message),
+			errors.New("Attachment File Not Found: " + file)
 		}
 	}
-
-	dialSend(m, server, port, username, password, usetls)
+	return m, nil
 }
 
-func dialSend(m *gomail.Message, server string, port int, username string, password string, usetls string) {
+func DialSend(
+	m *gomail.Message,
+	server string, port int, username string, password string, usetls string) {
 
-	fmt.Println(m)
 	d := gomail.NewDialer(server, port, username, password)
 	if strings.ToLower(usetls) == "yes" {
 		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
 	if err := d.DialAndSend(m); err != nil {
-		fmt.Printf("ERROR: Could not dial and send: %v", err)
+		log.Fatalf("[Error] Could not dial and send: %v", err)
 	}
 }

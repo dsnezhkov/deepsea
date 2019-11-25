@@ -15,8 +15,8 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 // configCmd represents the config command
@@ -25,7 +25,7 @@ var configCmd = &cobra.Command{
 	Short: "dump config file",
 	Long:  `Shows contents of config file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("config called")
+		log.Println("[Info] config is a meta command. See help")
 	},
 }
 

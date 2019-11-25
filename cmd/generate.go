@@ -18,16 +18,17 @@ import (
 	"deepsea/global"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/matcornic/hermes/v2"
-	"io/ioutil"
 )
 
 var SourceMDFile string
 var SourceTemplateHTMLFile string
 var TargetHTMLFile string
+
 
 // Theme
 type DTheme struct{}
@@ -39,16 +40,17 @@ func (dt *DTheme) Name() string {
 
 // HTMLTemplate returns a Golang template that will generate an HTML email.
 func (dt *DTheme) HTMLTemplate() string {
-	log.Printf("HTML template file: %s\n", viper.GetString("content.generate.SourceTemplateHTMLFile"))
-	return string(global.GetContentFromFile(viper.GetString("content.generate.SourceTemplateHTMLFile")))
+	log.Printf("[Debug] HTML template file: %s\n", viper.GetString("content.generate.SourceTemplateHTMLFile"))
+	return string(global.GetContentFromFile(
+		viper.GetString("content.generate.SourceTemplateHTMLFile")))
 }
 
+// TODO: Decide what to do with it
 func (dt *DTheme) PlainTextTemplate() string {
 	// return string(getContentFromFile( viper.GetString("content.generate.SourceTemplateTXTFile")))
 	return ""
 }
 
-// generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate HTML content from HTML template",
@@ -59,25 +61,41 @@ var generateCmd = &cobra.Command{
 }
 
 func init() {
+	generateCmd.Flags().StringVarP(
+		&SourceMDFile,
+		"SourceMDFile",
+		"M",
+		"",
+		"Path to Source of MarkDown content")
 
-	generateCmd.Flags().StringVarP(&SourceMDFile, "SourceMDFile", "M",
-		"", "Path to Source of MarkDown content")
-	generateCmd.Flags().StringVarP(&SourceTemplateHTMLFile, "SourceTemplateHTMLFile",
-		"T", "", "Path to Source of HTML template for Markdown")
-	generateCmd.Flags().StringVarP(&TargetHTMLFile, "TargetHTMLFile", "H", "", "Path to Destination of HTML file")
+	generateCmd.Flags().StringVarP(
+		&SourceTemplateHTMLFile,
+		"SourceTemplateHTMLFile",
+		"T",
+		"",
+		"Path to Source of HTML template for Markdown")
 
-	if err = viper.BindPFlag(
-		"content.generate.SourceMDFile", generateCmd.Flags().Lookup("SourceMDFile")); err != nil {
+	generateCmd.Flags().StringVarP(
+		&TargetHTMLFile,
+		"TargetHTMLFile",
+		"H",
+		"",
+		"Path to Destination of HTML file")
+
+	if err = viper.BindPFlag("content.generate.SourceMDFile",
+		generateCmd.Flags().Lookup("SourceMDFile")); err != nil {
 		_ = generateCmd.Help()
 		os.Exit(2)
 	}
 	if err = viper.BindPFlag(
-		"content.generate.SourceTemplateHTMLFile", generateCmd.Flags().Lookup("SourceTemplateHTMLFile")); err != nil {
+		"content.generate.SourceTemplateHTMLFile",
+		generateCmd.Flags().Lookup("SourceTemplateHTMLFile")); err != nil {
 		_ = generateCmd.Help()
 		os.Exit(2)
 	}
 	if err = viper.BindPFlag(
-		"content.generate.TargetHTMLFile", generateCmd.Flags().Lookup("TargetHTMLFile")); err != nil {
+		"content.generate.TargetHTMLFile",
+		generateCmd.Flags().Lookup("TargetHTMLFile")); err != nil {
 		_ = generateCmd.Help()
 		os.Exit(2)
 	}
@@ -87,12 +105,12 @@ func init() {
 
 func generateDriver(cmd *cobra.Command, args []string) {
 
-	log.Println("Processing Markdown")
+	log.Println("[Info] Processing Markdown")
 	var messageFPath = viper.GetString("content.generate.SourceMDFile")
-	log.Println(messageFPath)
+	log.Printf("[Info] Sourcing MD file: %s\n", messageFPath)
 	var mdMessage = hermes.Markdown(global.GetContentFromFileStr(messageFPath))
 
-	// Defaults
+	// Reset defaults, we are not using them
 	h := hermes.Hermes{
 
 		Theme: new(DTheme),
@@ -122,11 +140,35 @@ func generateDriver(cmd *cobra.Command, args []string) {
 		},
 	}
 
+	// Additional Exposed Template Metadata
+	log.Println("[Info] Setting up template data")
+	staticTmplData := viper.GetStringMapString(
+		"content.generate.template-data")
+	log.Printf("staticTmlData: %#v", staticTmplData)
+
+	if  len(staticTmplData)  != 0 {
+		if _, found := staticTmplData["dictionary"]; found {
+			kvDict := viper.GetStringMapString(
+			"content.generate.template-data.dictionary")
+			log.Printf("YML 'dictionary': %#v", kvDict)
+
+			for k,v :=range kvDict {
+				entry := hermes.Entry{Key:k, Value:v}
+				email.Body.Dictionary = append(email.Body.Dictionary, entry)
+				log.Printf("%s : %s", k,v)
+			}
+		}
+	}
+	log.Printf("Dictionary: %#v", email.Body.Dictionary )
+
+
+
 	// Generate an HTML email with the provided contents
 	emailHtml, err := h.GenerateHTML(email)
 	if err != nil {
 		log.Fatalf("Cannot Generate HTML from email: %s\n", err)
 	}
+
 	// Generated HTML to a local file
 	err = ioutil.WriteFile(viper.GetString(
 		"content.generate.TargetHTMLFile"), []byte(emailHtml), 0644)

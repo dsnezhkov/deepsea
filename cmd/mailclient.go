@@ -60,83 +60,129 @@ var mailclientCmd = &cobra.Command{
 
 func init() {
 
-	// Bind command flags to configuration file directives.
-	// So we can override them ont he command line
+	// Connection
+	mailclientCmd.Flags().StringVarP(
+		&SMTPServer,
+		"SMTPServer",
+		"s",
+		"127.0.0.1",
+		"SMTP server")
 
-	// Example:
-	// Cobra Flag name: SMTPPort
-	// Viper key:       mailclient.SMTPPort
-	// Variable :       SMTPPort
-	// Bind Viper's key to Cobra's Flag name
+	mailclientCmd.Flags().IntVarP(
+		&SMTPPort,
+		"SMTPPort",
+		"p",
+		25,
+		"SMTP server port")
 
-	// mailclient.connection
-	mailclientCmd.Flags().StringVarP(&SMTPServer, "SMTPServer", "s",
-		"127.0.0.1", "SMTP server")
-	mailclientCmd.Flags().IntVarP(&SMTPPort, "SMTPPort", "p",
-		25, "SMTP server port")
-	mailclientCmd.Flags().StringVarP(&SMTPUser, "SMTPUser", "U",
-		"testuser", "SMTP user")
-	mailclientCmd.Flags().StringVarP(&TLS, "TLS", "t",
-		"yes", "Use TLS handshake (STARTTLS)")
+	mailclientCmd.Flags().StringVarP(
+		&SMTPUser,
+		"SMTPUser",
+		"U",
+		"testuser",
+		"SMTP user")
+
+	mailclientCmd.Flags().StringVarP(
+		&TLS,
+		"TLS",
+		"t",
+		"yes",
+		"Use TLS handshake (STARTTLS)")
 
 	if err = viper.BindPFlag(
-		"mailcient.connection.SMTPServer", mailclientCmd.Flags().Lookup("SMTPServer")); err != nil {
-		_ = mailclientCmd.Help()
-		os.Exit(2)
-	}
-	if err = viper.BindPFlag(
-		"mailclient.connection.SMTPPort", mailclientCmd.Flags().Lookup("SMTPPort")); err != nil {
-		_ = mailclientCmd.Help()
-		os.Exit(2)
-	}
-	if err = viper.BindPFlag(
-		"mailclient.connection.SMTPUser", mailclientCmd.Flags().Lookup("SMTPUser")); err != nil {
-		_ = mailclientCmd.Help()
-		os.Exit(2)
-	}
-	if err = viper.BindPFlag(
-		"mailclient.connection.TLS", mailclientCmd.Flags().Lookup("TLS")); err != nil {
+		"mailcient.connection.SMTPServer",
+		mailclientCmd.Flags().Lookup("SMTPServer")); err != nil {
 		_ = mailclientCmd.Help()
 		os.Exit(2)
 	}
 
-	// mailclient.message
-	mailclientCmd.Flags().StringVarP(&From, "From", "F",
-		"", "Message From: header")
-	mailclientCmd.Flags().StringVarP(&To, "To", "T",
-		"", "Message To: header")
-	mailclientCmd.Flags().StringVarP(&Subject, "Subject", "S",
-		"", "Message Subject: header")
-
 	if err = viper.BindPFlag(
-		"mailclient.message.From", mailclientCmd.Flags().Lookup("From")); err != nil {
-		_ = mailclientCmd.Help()
-		os.Exit(2)
-	}
-	if err = viper.BindPFlag(
-		"mailclient.message.To", mailclientCmd.Flags().Lookup("To")); err != nil {
-		_ = mailclientCmd.Help()
-		os.Exit(2)
-	}
-	if err = viper.BindPFlag(
-		"mailclient.message.Subject", mailclientCmd.Flags().Lookup("Subject")); err != nil {
+		"mailclient.connection.SMTPPort",
+		mailclientCmd.Flags().Lookup("SMTPPort")); err != nil {
 		_ = mailclientCmd.Help()
 		os.Exit(2)
 	}
 
-	// mailclient.message.body
-	mailclientCmd.Flags().StringVarP(&BodyHTMLTemplate, "HTMLTemplate", "H",
+	if err = viper.BindPFlag(
+		"mailclient.connection.SMTPUser",
+		mailclientCmd.Flags().Lookup("SMTPUser")); err != nil {
+		_ = mailclientCmd.Help()
+		os.Exit(2)
+	}
+
+	if err = viper.BindPFlag(
+		"mailclient.connection.TLS",
+		mailclientCmd.Flags().Lookup("TLS")); err != nil {
+		_ = mailclientCmd.Help()
+		os.Exit(2)
+	}
+
+	// Message
+	mailclientCmd.Flags().StringVarP(
+		&From,
+		"From",
+		"F",
+		"",
+		"Message From: header")
+
+	mailclientCmd.Flags().StringVarP(
+		&To,
+		"To",
+		"T",
+		"",
+		"Message To: header")
+
+	mailclientCmd.Flags().StringVarP(
+		&Subject,
+		"Subject",
+		"S",
+		"",
+		"Message Subject: header")
+
+	if err = viper.BindPFlag(
+		"mailclient.message.From",
+		mailclientCmd.Flags().Lookup("From")); err != nil {
+		_ = mailclientCmd.Help()
+		os.Exit(2)
+	}
+
+	if err = viper.BindPFlag(
+		"mailclient.message.To",
+		mailclientCmd.Flags().Lookup("To")); err != nil {
+		_ = mailclientCmd.Help()
+		os.Exit(2)
+	}
+
+	if err = viper.BindPFlag(
+		"mailclient.message.Subject",
+		mailclientCmd.Flags().Lookup("Subject")); err != nil {
+		_ = mailclientCmd.Help()
+		os.Exit(2)
+	}
+
+	// message body
+	mailclientCmd.Flags().StringVarP(
+		&BodyHTMLTemplate,
+		"HTMLTemplate",
+		"H",
 		"", "HTML Template file (.htpl)")
-	mailclientCmd.Flags().StringVarP(&BodyTextTemplate, "TextTemplate", "P",
+
+	mailclientCmd.Flags().StringVarP(
+		&BodyTextTemplate,
+		"TextTemplate",
+		"P",
 		"", "Text Template file (.ttpl)")
 
 	if err = viper.BindPFlag(
-		"mailclient.message.body.html", mailclientCmd.Flags().Lookup("HTMLTemplate")); err != nil {
+		"mailclient.message.body.html",
+		mailclientCmd.Flags().Lookup("HTMLTemplate")); err != nil {
 		_ = mailclientCmd.Help()
 		os.Exit(2)
 	}
+
 	if err = viper.BindPFlag(
-		"mailclient.message.body.text", mailclientCmd.Flags().Lookup("TextTemplate")); err != nil {
+		"mailclient.message.body.text",
+		mailclientCmd.Flags().Lookup("TextTemplate")); err != nil {
 		_ = mailclientCmd.Help()
 		os.Exit(2)
 	}
@@ -147,19 +193,19 @@ func init() {
 // Processing
 func getUserCredentials(server *string) (string, error) {
 
-	fmt.Printf("-= SMTP Authentication Credentials for %s =- \n", *server)
-	fmt.Print("Enter Password: ")
+	log.Printf("[Info] SMTP Authentication Credentials for %s =- \n", *server)
+	log.Println("Enter Password: ")
 	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
 	if err != nil {
 		return "", err
 	}
 	password := string(bytePassword)
-
 	return strings.TrimSpace(password), nil
 }
 
 func mailDriver(cmd *cobra.Command, args []string) {
 
+	// Connectivity
 	SMTPServer = viper.GetString("mailclient.connection.SMTPServer")
 	SMTPPort = viper.GetInt("mailclient.connection.SMTPPort")
 	SMTPUser = viper.GetString("mailclient.connection.SMTPUser")
@@ -183,53 +229,44 @@ func mailDriver(cmd *cobra.Command, args []string) {
 	Embeds = viper.GetStringSlice("mailclient.message.embed")
 
 	// Additional Exposed Template Metadata
-	// tdata.URLTop = viper.GetString("mailclient.message.template-data.URLTop")
-
-	log.Println("Setting up template data")
+	log.Println("[Info] Setting up template data")
 	staticTmplData := viper.GetStringMapString(
 		"mailclient.message.template-data")
-	log.Printf("staticTmplData %#v Len:%d\n", staticTmplData, len(staticTmplData))
+
 	if len(staticTmplData) != 0 {
 		if _, found := staticTmplData["dictionary"]; found {
-			log.Printf("Dictionary key found\n")
 			kvDict := viper.GetStringMapString(
 				"mailclient.message.template-data.Dictionary")
-			log.Printf("Dict: %#v\n", kvDict)
+			log.Printf("[Debug] Template: %#v\n", kvDict)
 
 			// fmt.Println(kvDict)
 			tdata.Dictionary = map[string]string{}
 			for k, v := range kvDict {
 				tdata.Dictionary[k] = v
-				log.Printf("Dict KEY: %s : %s", k, v)
+				log.Printf("[Debug] Template Layout: %s : %s", k, v)
 			}
 		}
 	}
 
 	// Debug
-	fmt.Printf("-= Connection Parameters =-")
-	fmt.Printf("SMTP Server : %s\n", SMTPServer)
-	fmt.Printf("SMTP Port   : %d\n", SMTPPort)
-	fmt.Printf("SMTP User : %s\n", SMTPUser)
-	fmt.Printf("SMTP TLS : %s\n", TLS)
+	log.Printf("[Debug] -= Connection Parameters =-")
+	log.Printf("[Debug] SMTP Server : %s\n", SMTPServer)
+	fmt.Printf("[Debug] SMTP Port   : %d\n", SMTPPort)
+	fmt.Printf("[Debug] SMTP User : %s\n", SMTPUser)
+	fmt.Printf("[Debug] SMTP TLS : %s\n", TLS)
 
-	fmt.Printf("From: %s\n", From)
-	fmt.Printf("To: %s\n", To)
-	fmt.Printf("Subject: %s\n", Subject)
+	fmt.Printf("[Debug] From: %s\n", From)
+	fmt.Printf("[Debug] To: %s\n", To)
+	fmt.Printf("[Debug] Subject: %s\n", Subject)
 
-	fmt.Printf("Text Template: %s\n", BodyTextTemplate)
-	fmt.Printf("HTML Template: %s\n", BodyHTMLTemplate)
+	fmt.Printf("[Debug] Text Template: %s\n", BodyTextTemplate)
+	fmt.Printf("[Debug] HTML Template: %s\n", BodyHTMLTemplate)
 
-	// Get SMTP credentials once
-	SMTPPass, err = getUserCredentials(&SMTPServer)
 
-	if err != nil {
-		fmt.Printf("ERROR: Unable to record credentials: %v\n", err)
-		os.Exit(2)
-	}
 
 	// Direct email, compose Mark and send
 	if global.EmailRe.MatchString(To) {
-		log.Printf("Mark is diredctly in the config. \n")
+		log.Printf("[Debug] Delivery to one email.\n")
 		var mark global.Mark
 		mark.Firstname = viper.GetString("mailclient.message.mark.firstname")
 		mark.Lastname = viper.GetString("mailclient.message.mark.lastname")
@@ -240,21 +277,21 @@ func mailDriver(cmd *cobra.Command, args []string) {
 		invokeRmail(&tdata)
 	}
 
-	fmt.Println(viper.GetString("mailclient.message.To"))
 	// Marks in CSV file
-	log.Printf("Marks in the database. \n")
-	if global.DBFileRe.MatchString(viper.GetString("mailclient.message.To")) {
-		var marks []global.Mark
+	log.Printf("[Info] Delivery to a list of marks. \n")
+	if global.DBFileRe.MatchString(
+		viper.GetString("mailclient.message.To")) {
 
+		var marks []global.Mark
 		var settings = ql.ConnectionURL{
-			Database: viper.GetString("mailclient.message.To"), // Path to database file.
+			Database: viper.GetString("mailclient.message.To"),
 		}
-		// Attemping to open the "example.db" database file.
+
 		sess, err := ql.Open(settings)
 		if err != nil {
 			log.Fatalf("db.Open(): %q\n", err)
 		}
-		defer sess.Close() // Remember to close the database session.
+		defer sess.Close()
 
 		log.Printf("Pointing to mark table \n")
 		markCollection := sess.Collection("mark")
@@ -269,10 +306,9 @@ func mailDriver(cmd *cobra.Command, args []string) {
 			log.Fatalf("res.All(): %q\n", err)
 		}
 
-		// Printing to stdout.
-		log.Printf("-= Marks =-\n")
+		log.Printf("[Info] -= Marks =-\n")
 		for _, mark := range marks {
-			fmt.Printf("Emailing: %s [id:%s] - %s %s\n",
+			fmt.Printf("[Info] Sending: %s [id:%s] - %s %s\n",
 				mark.Email,
 				mark.Identifier,
 				mark.Firstname,
@@ -282,18 +318,12 @@ func mailDriver(cmd *cobra.Command, args []string) {
 			invokeRmail(&tdata)
 			time.Sleep(5 * time.Second)
 		}
-
 	}
-
 }
 
 func invokeRmail(tdata *rmailer.TemplateData) {
-	rmailer.GenMail(
-		SMTPUser,
-		SMTPPass,
+	m, err := rmailer.GenMail(
 		SMTPServer,
-		SMTPPort,
-		TLS,
 		From,
 		Subject,
 		BodyTextTemplate, BodyHTMLTemplate,
@@ -301,4 +331,20 @@ func invokeRmail(tdata *rmailer.TemplateData) {
 		Embeds,
 		Headers,
 		tdata)
+
+	if err != nil {
+		log.Fatalln("[Error] ", err )
+	}
+
+	// Get SMTP credentials once
+	// TODO: Implement Dry-run, with only final message generation but no send
+	if len(SMTPPass) == 0 {
+		// Ask and Cache password
+		SMTPPass, err = getUserCredentials(&SMTPServer)
+		if err != nil {
+			log.Fatalf("[Error] Unable to record credentials: %v\n", err)
+		}
+	}
+	log.Printf("Mailing ...")
+	rmailer.DialSend(m, SMTPServer, SMTPPort, SMTPUser, SMTPPass, TLS)
 }

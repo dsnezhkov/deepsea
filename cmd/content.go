@@ -29,7 +29,6 @@ var contentCmd = &cobra.Command{
 }
 
 func init() {
-
 	rootCmd.AddCommand(contentCmd)
 }
 func contentDriver(cmd *cobra.Command, args []string) {}

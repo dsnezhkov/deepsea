@@ -34,11 +34,16 @@ var storageCmd = &cobra.Command{
 
 func init() {
 
-	storageCmd.Flags().StringVarP(&DBFile, "DBFile", "d",
-		"", "Path to SQL DB file")
+	storageCmd.Flags().StringVarP(
+		&DBFile,
+		"DBFile",
+		"d",
+		"",
+		"Path to SQL DB file")
 
 	if err = viper.BindPFlag(
-		"storage.DBFile", storageCmd.Flags().Lookup("DBFile")); err != nil {
+		"storage.DBFile",
+		storageCmd.Flags().Lookup("DBFile")); err != nil {
 		_ = storageCmd.Help()
 		os.Exit(2)
 	}
