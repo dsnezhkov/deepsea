@@ -19,16 +19,15 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/matcornic/hermes/v2"
+	jlog "github.com/spf13/jwalterweatherman"
 )
 
 var SourceMDFile string
 var SourceTemplateHTMLFile string
 var TargetHTMLFile string
-
 
 // Theme
 type DTheme struct{}
@@ -40,9 +39,14 @@ func (dt *DTheme) Name() string {
 
 // HTMLTemplate returns a Golang template that will generate an HTML email.
 func (dt *DTheme) HTMLTemplate() string {
-	log.Printf("[Debug] HTML template file: %s\n", viper.GetString("content.generate.SourceTemplateHTMLFile"))
-	return string(global.GetContentFromFile(
+	sthf := string(global.GetContentFromFile(
 		viper.GetString("content.generate.SourceTemplateHTMLFile")))
+	if len(sthf) != 0 {
+		jlog.DEBUG.Printf("HTML template file: %s\n", sthf)
+		return sthf
+	}
+	jlog.DEBUG.Print("HTML template file is empty")
+	return ""
 }
 
 // TODO: Decide what to do with it
@@ -56,6 +60,7 @@ var generateCmd = &cobra.Command{
 	Short: "Generate HTML content from HTML template",
 	Long:  `GENERATE: Help here`,
 	Run: func(cmd *cobra.Command, args []string) {
+		jlog.DEBUG.Print("Cobra.Command: generateDriver()")
 		generateDriver(cmd, args)
 	},
 }
@@ -85,18 +90,22 @@ func init() {
 	if err = viper.BindPFlag("content.generate.SourceMDFile",
 		generateCmd.Flags().Lookup("SourceMDFile")); err != nil {
 		_ = generateCmd.Help()
+
+		jlog.ERROR.Println("Error processing flag: `content.generate.SourceMDFile`")
 		os.Exit(2)
 	}
 	if err = viper.BindPFlag(
 		"content.generate.SourceTemplateHTMLFile",
 		generateCmd.Flags().Lookup("SourceTemplateHTMLFile")); err != nil {
 		_ = generateCmd.Help()
+		jlog.ERROR.Println("Error processing flag: `content.generate.SourceTemplateHTMLFile`")
 		os.Exit(2)
 	}
 	if err = viper.BindPFlag(
 		"content.generate.TargetHTMLFile",
 		generateCmd.Flags().Lookup("TargetHTMLFile")); err != nil {
 		_ = generateCmd.Help()
+		jlog.ERROR.Println("Error processing flag: `content.generate.TargetHTMLFile`")
 		os.Exit(2)
 	}
 
@@ -105,9 +114,13 @@ func init() {
 
 func generateDriver(cmd *cobra.Command, args []string) {
 
-	log.Println("[Info] Processing Markdown")
+	jlog.INFO.Println("Processing Markdown")
+
+	//TODO: check validity
 	var messageFPath = viper.GetString("content.generate.SourceMDFile")
-	log.Printf("[Info] Sourcing MD file: %s\n", messageFPath)
+	jlog.DEBUG.Printf("[Info] Sourcing MD file: %s\n", messageFPath)
+
+	//TODO: check validity
 	var mdMessage = hermes.Markdown(global.GetContentFromFileStr(messageFPath))
 
 	// Reset defaults, we are not using them
@@ -141,39 +154,38 @@ func generateDriver(cmd *cobra.Command, args []string) {
 	}
 
 	// Additional Exposed Template Metadata
-	log.Println("[Info] Setting up template data")
+	jlog.DEBUG.Println("[Info] Setting up template data")
 	staticTmplData := viper.GetStringMapString(
 		"content.generate.template-data")
-	log.Printf("staticTmlData: %#v", staticTmplData)
+	jlog.DEBUG.Printf("staticTmlData: %#v", staticTmplData)
 
-	if  len(staticTmplData)  != 0 {
+	if len(staticTmplData) != 0 {
 		if _, found := staticTmplData["dictionary"]; found {
 			kvDict := viper.GetStringMapString(
-			"content.generate.template-data.dictionary")
-			log.Printf("YML 'dictionary': %#v", kvDict)
+				"content.generate.template-data.dictionary")
+			jlog.TRACE.Printf("YML 'dictionary': %#v", kvDict)
 
-			for k,v :=range kvDict {
-				entry := hermes.Entry{Key:k, Value:v}
+			for k, v := range kvDict {
+				entry := hermes.Entry{Key: k, Value: v}
 				email.Body.Dictionary = append(email.Body.Dictionary, entry)
-				log.Printf("%s : %s", k,v)
+				jlog.TRACE.Printf("%s : %s", k, v)
 			}
 		}
 	}
-	log.Printf("Dictionary: %#v", email.Body.Dictionary )
-
-
+	jlog.TRACE.Printf("Dictionary: %#v", email.Body.Dictionary)
 
 	// Generate an HTML email with the provided contents
 	emailHtml, err := h.GenerateHTML(email)
 	if err != nil {
-		log.Fatalf("Cannot Generate HTML from email: %s\n", err)
+		jlog.FATAL.Printf("Cannot Generate HTML from email: %s\n", err)
+		os.Exit(2)
 	}
 
 	// Generated HTML to a local file
 	err = ioutil.WriteFile(viper.GetString(
 		"content.generate.TargetHTMLFile"), []byte(emailHtml), 0644)
 	if err != nil {
-		log.Fatalf("Cannot save HTML file: %s\n", err)
+		jlog.FATAL.Printf("Cannot save HTML file: %s\n", err)
 	}
 	/*
 		// Generate an TXT email with the provided contents

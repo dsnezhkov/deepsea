@@ -18,6 +18,7 @@ import (
 	"deepsea/global"
 	"github.com/aymerick/douceur/inliner"
 	"github.com/spf13/cobra"
+	jlog "github.com/spf13/jwalterweatherman"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"log"
@@ -33,6 +34,7 @@ var inlineCmd = &cobra.Command{
 	Short: "Inline HTML content for emailing",
 	Long:  `INLINE: Help here`,
 	Run: func(cmd *cobra.Command, args []string) {
+		jlog.TRACE.Println("inlineDriver()")
 		inlineDriver(cmd, args)
 	},
 }
@@ -47,11 +49,13 @@ func init() {
 	if err = viper.BindPFlag(
 		"content.inline.SourceContentHTMLFile", inlineCmd.Flags().Lookup("SourceContentHTMLFile")); err != nil {
 		_ = inlineCmd.Help()
+		jlog.ERROR.Println("Error processing flag: `content.inline.SourceContentHTMLFile`")
 		os.Exit(2)
 	}
 	if err = viper.BindPFlag(
 		"content.inline.TargetMailTemplateHTMLFile", inlineCmd.Flags().Lookup("TargetMailTemplateHTMLFile")); err != nil {
 		_ = inlineCmd.Help()
+		jlog.ERROR.Println("Error processing flag: `content.inline.TargetContentHTMLFile`")
 		os.Exit(2)
 	}
 

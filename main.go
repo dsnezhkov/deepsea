@@ -14,8 +14,39 @@
 
 package main
 
-import "deepsea/cmd"
+import (
+	"deepsea/cmd"
+	"deepsea/global"
+	jlog "github.com/spf13/jwalterweatherman"
+	"os"
+)
 
 func main() {
+
+	var err error
+	var logSink *os.File
+	var logFile = "deepsea.log"
+
+	jlog.SetLogThreshold(jlog.LevelDebug)
+	jlog.SetStdoutThreshold(jlog.LevelDebug)
+
+	if !global.FileExists(logFile) {
+		jlog.DEBUG.Printf("Creating log %s", logFile)
+		logSink, err = os.Create(logFile)
+		if err != nil {
+			jlog.ERROR.Printf("Log not available %v", err)
+		}
+		jlog.DEBUG.Printf("Created log %s", logFile)
+	} else {
+		logSink, err = os.Open(logFile)
+		if err != nil {
+			jlog.ERROR.Printf("Log not available %v", err)
+		}
+	}
+	defer func() {
+		_ = logSink.Close()
+	}()
+
+	jlog.SetLogOutput(logSink)
 	cmd.Execute()
 }

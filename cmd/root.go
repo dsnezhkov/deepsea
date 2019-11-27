@@ -16,10 +16,10 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
+	jlog "github.com/spf13/jwalterweatherman"
 	"github.com/spf13/viper"
 )
 
@@ -31,14 +31,14 @@ var rootCmd = &cobra.Command{
 	Short: "Red Team phishing gear",
 	Long:  ` ROOT: see //dsnezhkov.github.io/deepsea...`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("... Deep Sea ...")
-
+		fmt.Println("If you need help with usage => `deepsea help`")
 	},
 }
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatalf("[Error] cobra.Command: %v\n", err)
+		jlog.FATAL.Printf("Execute(): Cobra.Command: %v\n", err)
+		os.Exit(2)
 	}
 }
 
@@ -55,20 +55,20 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 		viper.SetConfigType("yaml")
 	} else {
-		log.Printf("[Error]: Config file not provided")
+		jlog.ERROR.Println("Config file not provided")
 		if err := rootCmd.Help(); err != nil {
-			fmt.Print("Error executing help")
+			jlog.ERROR.Println("Error executing help()")
 			os.Exit(2)
 		}
-		os.Exit(1)
+		os.Exit(2)
 	}
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		log.Println("[Info] Using config file:", viper.ConfigFileUsed())
+		jlog.DEBUG.Println("Using config file: ", viper.ConfigFileUsed())
 	} else {
-		log.Printf("[Error] Config File Use Error: %v\n", err)
+		jlog.DEBUG.Printf("Config File Use Error: %v\n", err)
 		os.Exit(2)
 	}
 }

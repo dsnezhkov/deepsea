@@ -17,7 +17,6 @@ package cmd
 import (
 	"fmt"
 	"golang.org/x/crypto/ssh/terminal"
-	"log"
 	"os"
 	"strings"
 	"syscall"
@@ -28,6 +27,8 @@ import (
 	"deepsea/rmailer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	jlog "github.com/spf13/jwalterweatherman"
 )
 
 var SMTPServer string
@@ -54,6 +55,7 @@ var mailclientCmd = &cobra.Command{
 	Short: "Email a phish",
 	Long:  `Email a phish with features`,
 	Run: func(cmd *cobra.Command, args []string) {
+		jlog.DEBUG.Println("mailDriver()")
 		mailDriver(cmd, args)
 	},
 }
@@ -92,6 +94,7 @@ func init() {
 	if err = viper.BindPFlag(
 		"mailcient.connection.SMTPServer",
 		mailclientCmd.Flags().Lookup("SMTPServer")); err != nil {
+		jlog.DEBUG.Println("Setting SMTPServer")
 		_ = mailclientCmd.Help()
 		os.Exit(2)
 	}
@@ -99,6 +102,7 @@ func init() {
 	if err = viper.BindPFlag(
 		"mailclient.connection.SMTPPort",
 		mailclientCmd.Flags().Lookup("SMTPPort")); err != nil {
+		jlog.DEBUG.Println("Setting SMTPPort")
 		_ = mailclientCmd.Help()
 		os.Exit(2)
 	}
@@ -106,6 +110,7 @@ func init() {
 	if err = viper.BindPFlag(
 		"mailclient.connection.SMTPUser",
 		mailclientCmd.Flags().Lookup("SMTPUser")); err != nil {
+		jlog.DEBUG.Println("Setting SMTPUser")
 		_ = mailclientCmd.Help()
 		os.Exit(2)
 	}
@@ -113,6 +118,7 @@ func init() {
 	if err = viper.BindPFlag(
 		"mailclient.connection.TLS",
 		mailclientCmd.Flags().Lookup("TLS")); err != nil {
+		jlog.DEBUG.Println("Setting TLS")
 		_ = mailclientCmd.Help()
 		os.Exit(2)
 	}
@@ -193,13 +199,17 @@ func init() {
 // Processing
 func getUserCredentials(server *string) (string, error) {
 
-	log.Printf("[Info] SMTP Authentication Credentials for %s =- \n", *server)
-	log.Println("Enter Password: ")
+	jlog.INFO.Printf("SMTP Auth Creds for %s: \n", *server)
+	fmt.Println("\nEnter Password: ")
+
 	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
 	if err != nil {
+		jlog.DEBUG.Println("Password sourcing error")
 		return "", err
 	}
 	password := string(bytePassword)
+	jlog.DEBUG.Println("Returning trimmed password")
+	jlog.TRACE.Printf("PW: %s\n", password)
 	return strings.TrimSpace(password), nil
 }
 
@@ -208,7 +218,6 @@ func mailDriver(cmd *cobra.Command, args []string) {
 	// Connectivity
 	SMTPServer = viper.GetString("mailclient.connection.SMTPServer")
 	SMTPPort = viper.GetInt("mailclient.connection.SMTPPort")
-	SMTPUser = viper.GetString("mailclient.connection.SMTPUser")
 	SMTPUser = viper.GetString("mailclient.connection.SMTPUser")
 	TLS = viper.GetString("mailclient.connection.TLS")
 
@@ -228,45 +237,59 @@ func mailDriver(cmd *cobra.Command, args []string) {
 	Attachments = viper.GetStringSlice("mailclient.message.attach")
 	Embeds = viper.GetStringSlice("mailclient.message.embed")
 
+	if len(From) == 0 {
+		jlog.ERROR.Fatalln("From: cannot be empty")
+	}
+	if len(To) == 0 {
+		jlog.ERROR.Fatalln("To: cannot be empty")
+	}
+	if len(BodyTextTemplate) == 0 {
+		jlog.ERROR.Fatalln("BodyTextTemplate: cannot be empty")
+	}
+	if len(BodyHTMLTemplate) == 0 {
+		jlog.ERROR.Fatalln("BodyHTMLTemplate: cannot be empty")
+	}
+
 	// Additional Exposed Template Metadata
-	log.Println("[Info] Setting up template data")
+	jlog.INFO.Println("Setting up template data")
 	staticTmplData := viper.GetStringMapString(
 		"mailclient.message.template-data")
 
 	if len(staticTmplData) != 0 {
+		jlog.DEBUG.Println("Template data is present")
 		if _, found := staticTmplData["dictionary"]; found {
+			jlog.DEBUG.Println("Template data [dictionary] is present")
 			kvDict := viper.GetStringMapString(
 				"mailclient.message.template-data.Dictionary")
-			log.Printf("[Debug] Template: %#v\n", kvDict)
+			jlog.DEBUG.Printf("Template data: %#v\n", kvDict)
 
-			// fmt.Println(kvDict)
 			tdata.Dictionary = map[string]string{}
 			for k, v := range kvDict {
 				tdata.Dictionary[k] = v
-				log.Printf("[Debug] Template Layout: %s : %s", k, v)
+				jlog.DEBUG.Printf("Template dictionary layout: %s : %s", k, v)
 			}
 		}
 	}
 
-	// Debug
-	log.Printf("[Debug] -= Connection Parameters =-")
-	log.Printf("[Debug] SMTP Server : %s\n", SMTPServer)
-	fmt.Printf("[Debug] SMTP Port   : %d\n", SMTPPort)
-	fmt.Printf("[Debug] SMTP User : %s\n", SMTPUser)
-	fmt.Printf("[Debug] SMTP TLS : %s\n", TLS)
+	jlog.DEBUG.Println("-= = = = Connection Parameters = = = =-")
+	jlog.DEBUG.Printf("SMTP Server : %s\n", SMTPServer)
+	jlog.DEBUG.Printf("SMTP Port   : %d\n", SMTPPort)
+	jlog.DEBUG.Printf("SMTP TLS    : %s\n", TLS)
+	jlog.DEBUG.Printf("SMTP User   : %s\n", SMTPUser)
+	jlog.DEBUG.Printf("SMTP Pass(n): %d\n", len(SMTPPass))
 
-	fmt.Printf("[Debug] From: %s\n", From)
-	fmt.Printf("[Debug] To: %s\n", To)
-	fmt.Printf("[Debug] Subject: %s\n", Subject)
+	jlog.DEBUG.Println("-= = = = Message Envelope Parameters = = = =-")
+	jlog.DEBUG.Printf("From   : %s\n", From)
+	jlog.DEBUG.Printf("To     : %s\n", To)
+	jlog.DEBUG.Printf("Subject: %s\n", Subject)
 
-	fmt.Printf("[Debug] Text Template: %s\n", BodyTextTemplate)
-	fmt.Printf("[Debug] HTML Template: %s\n", BodyHTMLTemplate)
+	jlog.DEBUG.Println("-= = = = Message BODY Parameters = = = =-")
+	jlog.DEBUG.Printf("HTML Template (f): %s\n", BodyHTMLTemplate)
+	jlog.DEBUG.Printf("Text Template (f): %s\n", BodyTextTemplate)
 
-
-
-	// Direct email, compose Mark and send
 	if global.EmailRe.MatchString(To) {
-		log.Printf("[Debug] Delivery to one email.\n")
+		jlog.DEBUG.Println("Delivery to a single email.")
+
 		var mark global.Mark
 		mark.Firstname = viper.GetString("mailclient.message.mark.firstname")
 		mark.Lastname = viper.GetString("mailclient.message.mark.lastname")
@@ -278,7 +301,7 @@ func mailDriver(cmd *cobra.Command, args []string) {
 	}
 
 	// Marks in CSV file
-	log.Printf("[Info] Delivery to a list of marks. \n")
+	jlog.DEBUG.Printf("Delivery to a list of marks. \n")
 	if global.DBFileRe.MatchString(
 		viper.GetString("mailclient.message.To")) {
 
@@ -289,26 +312,26 @@ func mailDriver(cmd *cobra.Command, args []string) {
 
 		sess, err := ql.Open(settings)
 		if err != nil {
-			log.Fatalf("db.Open(): %q\n", err)
+			jlog.ERROR.Fatalf("db.Open(): %q\n", err)
 		}
 		defer sess.Close()
 
-		log.Printf("Pointing to mark table \n")
+		jlog.DEBUG.Println("Pointing to mark table")
 		markCollection := sess.Collection("mark")
 
 		// Let's query for the results we've just inserted.
-		log.Printf("Querying for result : find()\n")
+		jlog.DEBUG.Println("Querying for result : find()")
 		res := markCollection.Find()
 
-		log.Printf("Getting all results\n")
+		jlog.DEBUG.Println("Getting all results")
 		err = res.All(&marks)
 		if err != nil {
-			log.Fatalf("res.All(): %q\n", err)
+			jlog.ERROR.Fatalf("res.All(): %q\n", err)
 		}
 
-		log.Printf("[Info] -= Marks =-\n")
+		jlog.DEBUG.Println("-= = = = Marks = = = =-")
 		for _, mark := range marks {
-			fmt.Printf("[Info] Sending: %s [id:%s] - %s %s\n",
+			jlog.INFO.Printf(" M => Dialer: %s [id:%s] - %s %s\n",
 				mark.Email,
 				mark.Identifier,
 				mark.Firstname,
@@ -316,6 +339,7 @@ func mailDriver(cmd *cobra.Command, args []string) {
 			)
 			tdata.Mark = &mark
 			invokeRmail(&tdata)
+			jlog.DEBUG.Println("Sleeping")
 			time.Sleep(5 * time.Second)
 		}
 	}
@@ -333,7 +357,7 @@ func invokeRmail(tdata *rmailer.TemplateData) {
 		tdata)
 
 	if err != nil {
-		log.Fatalln("[Error] ", err )
+		jlog.ERROR.Fatalln("Mail Generation Error: ", err)
 	}
 
 	// Get SMTP credentials once
@@ -342,9 +366,10 @@ func invokeRmail(tdata *rmailer.TemplateData) {
 		// Ask and Cache password
 		SMTPPass, err = getUserCredentials(&SMTPServer)
 		if err != nil {
-			log.Fatalf("[Error] Unable to record credentials: %v\n", err)
+			jlog.ERROR.Fatalf("Unable to record credentials: %v\n", err)
 		}
 	}
-	log.Printf("Mailing ...")
+	jlog.INFO.Print("Sending Email ... ")
 	rmailer.DialSend(m, SMTPServer, SMTPPort, SMTPUser, SMTPPass, TLS)
+	jlog.INFO.Print("OK")
 }

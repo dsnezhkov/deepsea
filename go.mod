@@ -22,6 +22,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.3 // indirect
 	github.com/severedsea/hermes v1.1.1
 	github.com/spf13/cobra v0.0.5
+	github.com/spf13/jwalterweatherman v1.0.0
 	github.com/spf13/viper v1.5.0
 	golang.org/x/crypto v0.0.0-20191122220453-ac88ee75c92c
 	modernc.org/b v1.0.0 // indirect

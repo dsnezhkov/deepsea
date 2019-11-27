@@ -54,16 +54,13 @@ func CSV2Json(mfile string) ([]byte, error) {
 	return marksJson, nil
 }
 
-// Exists reports whether the named file exists.
-func FileExists(name string) bool {
-	if _, err := os.Stat(name); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
+func FileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
 	}
-	return true
+	return !info.IsDir()
 }
-
 func RegToString(regPattern string) (string, error) {
 
 	ident, err := reggen.Generate(regPattern, 1)

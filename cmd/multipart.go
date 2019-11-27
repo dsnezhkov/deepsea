@@ -21,8 +21,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
-	"log"
 	"os"
+
+	jlog "github.com/spf13/jwalterweatherman"
 )
 
 var SourceMailTemplateHTMLFile string
@@ -33,6 +34,7 @@ var multipartCmd = &cobra.Command{
 	Short: "Multipart HTML->TXT content for emailing",
 	Long:  `MULTIPART: Help here`,
 	Run: func(cmd *cobra.Command, args []string) {
+		jlog.DEBUG.Println("multipartDriver()")
 		multipartDriver(cmd, args)
 	},
 }
@@ -62,19 +64,20 @@ func multipartDriver(cmd *cobra.Command, args []string) {
 
 	var source = viper.GetString("content.multipart.SourceMailTemplateHTMLFile")
 	var dest = viper.GetString("content.multipart.TargetMailTemplateTXTFile")
-	log.Printf("content.multipart.SourceMailTemplateHTMLFile: %s\n", source)
-	log.Printf("content.multipart.TargetMailTemplateTXTFile: %s\n", dest)
+
+	jlog.DEBUG.Printf("content.multipart.SourceMailTemplateHTMLFile: %s\n", source)
+	jlog.DEBUG.Printf("content.multipart.TargetMailTemplateTXTFile: %s\n", dest)
 
 	var htSrc = global.GetContentFromFile(source)
 
 	text, err := html2text.FromReader(bytes.NewReader(htSrc))
 	if err != nil {
-		log.Fatalf("Unable to multipart: %s : %s\n", source, err)
+		jlog.ERROR.Fatalf("Unable to multipart: %s : %s\n", source, err)
 	}
 
 	err = ioutil.WriteFile(dest, []byte(text), 0644)
 	if err != nil {
-		log.Fatalf("Unable to save text file: %s : %s\n", dest, err)
+		jlog.ERROR.Fatalf("Unable to save text file: %s : %s\n", dest, err)
 	}
 
 }

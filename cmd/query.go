@@ -18,8 +18,8 @@ import (
 	"deepsea/global"
 	"fmt"
 	"github.com/spf13/cobra"
+	jlog "github.com/spf13/jwalterweatherman"
 	"github.com/spf13/viper"
-	"log"
 	"os"
 	"strings"
 	"upper.io/db.v3"
@@ -29,17 +29,16 @@ import (
 
 var DBTask string
 
-// queryCmd represents the query command
-var queryCmd = &cobra.Command{
-	Use:   "query",
-	Short: "Query storage",
-	Long:  `QUERY: Help`,
+// managerCmd represents the db management command
+var managerCmd = &cobra.Command{
+	Use:   "manager",
+	Short: "Manage information in marks database",
+	Long:  `MANAGER: Help`,
 	Run: func(cmd *cobra.Command, args []string) {
-		queryDriver(cmd, args)
+		jlog.DEBUG.Println("managerDriver()")
+		managerDriver(cmd, args)
 	},
 }
-
-//var optDBTask = []string{"showmarks", "somethingelse"}
 
 var optDBTaskMap = map[string]interface{}{
 	"showmarks":    qShowMarks,
@@ -56,14 +55,14 @@ func init() {
 		optDBTaskMapKeys = append(optDBTaskMapKeys, key)
 	}
 
-	queryCmd.Flags().StringVarP(
+	managerCmd.Flags().StringVarP(
 		&DBFile,
 		"DBFile",
 		"d",
 		"",
 		"Path to QL DB file")
 
-	queryCmd.Flags().StringVarP(
+	managerCmd.Flags().StringVarP(
 		&DBTask,
 		"DBTask",
 		"t",
@@ -72,56 +71,64 @@ func init() {
 
 	if err = viper.BindPFlag(
 		"storage.DBFile",
-		queryCmd.Flags().Lookup("DBFile")); err != nil {
-		_ = queryCmd.Help()
+		managerCmd.Flags().Lookup("DBFile")); err != nil {
+		jlog.DEBUG.Println("Setting DBFile")
+		_ = managerCmd.Help()
 		os.Exit(2)
 	}
 
 	if err = viper.BindPFlag(
-		"storage.query.DBTask",
-		queryCmd.Flags().Lookup("DBTask")); err != nil {
-		_ = queryCmd.Help()
+		"storage.manager.DBTask",
+		managerCmd.Flags().Lookup("DBTask")); err != nil {
+		jlog.ERROR.Println("Setting DBTask")
+		_ = managerCmd.Help()
 		os.Exit(2)
 	}
-	storageCmd.AddCommand(queryCmd)
+
+	storageCmd.AddCommand(managerCmd)
 }
 
-func queryDriver(cmd *cobra.Command, args []string) {
+func managerDriver(cmd *cobra.Command, args []string) {
 
 	optDBTaskMapKeys := make([]string, 0)
 	for key := range optDBTaskMap {
 		optDBTaskMapKeys = append(optDBTaskMapKeys, key)
 	}
 
+	jlog.DEBUG.Println("Setting DBFile link")
 	var settings = ql.ConnectionURL{
 		Database: viper.GetString("storage.DBFile"),
 	}
 
 	sess, err := ql.Open(settings)
 	if err != nil {
-		log.Fatalf("[Error] db.Open(): %q\n", err)
+		jlog.ERROR.Printf("db.Open(): %q\n", err)
 	}
-	defer sess.Close() // Remember to close the database session.
+	defer sess.Close()
 
+	jlog.TRACE.Printf("Making a Collection")
 	markCollection := sess.Collection("mark")
 
-	dt := viper.GetString("storage.query.DBTask")
+	jlog.TRACE.Printf("Getting a DBTask")
+	dt := viper.GetString("storage.manager.DBTask")
 	if val, ok := optDBTaskMap[dt]; ok {
-		log.Printf("[Info] Task: %s", dt)
+		jlog.DEBUG.Printf("Found Valid Task: %s", dt)
 
-		// Convert string to a function call:
+		//
+		jlog.TRACE.Println("Converting Task to a function call")
 		val.(func(database sqlbuilder.Database, collection db.Collection))(
 			sess, markCollection.(db.Collection))
 
 	} else {
-		log.Printf("Task:%s undefined. Valid options:\n", dt)
-		log.Printf("%s\n", strings.Join(optDBTaskMapKeys, "|"))
+		jlog.ERROR.Printf(
+			"Task:%s undefined. Valid options: %s\n", dt, strings.Join(optDBTaskMapKeys, "|"))
+		os.Exit(3)
 	}
 }
 
 func qShowMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 	// Query for the results we've just inserted.
-	log.Printf("[Info] Querying for result : find()\n")
+	jlog.DEBUG.Printf("Querying for result : find()\n")
 	res := markCollection.Find()
 
 	// Query all results and fill the mark variable with them.
@@ -129,11 +136,10 @@ func qShowMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 
 	err = res.All(&marks)
 	if err != nil {
-		log.Fatalf("[Error] res.All(): %q\n", err)
+		jlog.ERROR.Fatalf("res.All(): %q\n", err)
 	}
 
-	// Printing to stdout.
-	log.Printf("[Info] -= Table: Marks =-\n")
+	jlog.INFO.Println("-= = = = Table: Marks = = = =-")
 	for _, mark := range marks {
 		fmt.Printf("%s, %s, %s, %s.\n",
 			mark.Identifier,
@@ -145,20 +151,20 @@ func qShowMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 }
 
 func qTruncateMarks(sess sqlbuilder.Database, markCollection db.Collection) {
-	log.Printf("[Info] Removing existing rows (if any) \n")
+	jlog.INFO.Println("Removing existing rows (if any)")
 	err = markCollection.Truncate()
 	if err != nil {
-		log.Printf("[Error] Truncate(): %q\n", err)
+		jlog.ERROR.Fatalf("Truncate(): %q\n", err)
 	}
 }
 
 func qDropMarks(sess sqlbuilder.Database, markCollection db.Collection) {
-	log.Printf("[Info] Dropping table Mark if exists\n")
+	jlog.INFO.Println("Dropping table Mark if exists")
 	_, err = sess.Exec(`DROP TABLE IF EXISTS mark`)
 }
 
 func qCreateMarks(sess sqlbuilder.Database, markCollection db.Collection) {
-	log.Printf("[Info] Creating Marks table\n")
+	jlog.INFO.Println("Creating Marks table")
 	_, err = sess.Exec(`CREATE TABLE mark (
 			identifier string,
 			email string,
@@ -167,6 +173,7 @@ func qCreateMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 }
 
 func qRecycleMarks(sess sqlbuilder.Database, markCollection db.Collection) {
+	jlog.DEBUG.Println("Recycling Marks table")
 	qDropMarks(sess, markCollection)
 	qCreateMarks(sess, markCollection)
 }

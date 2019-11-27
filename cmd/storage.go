@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	jlog "github.com/spf13/jwalterweatherman"
 	"github.com/spf13/viper"
 	"os"
 )
@@ -28,6 +29,7 @@ var storageCmd = &cobra.Command{
 	Short: "Manage persistent record storage",
 	Long:  `STORAGE: TODO`,
 	Run: func(cmd *cobra.Command, args []string) {
+		jlog.DEBUG.Println("storageDriver()")
 		storageDriver(cmd, args)
 	},
 }
@@ -44,6 +46,7 @@ func init() {
 	if err = viper.BindPFlag(
 		"storage.DBFile",
 		storageCmd.Flags().Lookup("DBFile")); err != nil {
+		jlog.ERROR.Println("Setting DBFile")
 		_ = storageCmd.Help()
 		os.Exit(2)
 	}

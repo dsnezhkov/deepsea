@@ -15,8 +15,9 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
-	"log"
+	jlog "github.com/spf13/jwalterweatherman"
 )
 
 // configCmd represents the config command
@@ -25,10 +26,14 @@ var configCmd = &cobra.Command{
 	Short: "dump config file",
 	Long:  `Shows contents of config file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Println("[Info] config is a meta command. See help")
+		configDriver(cmd, args)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(configCmd)
+}
+func configDriver(cmd *cobra.Command, args []string) {
+	jlog.DEBUG.Println("configDriver()")
+	fmt.Println("Feature not implemented")
 }
