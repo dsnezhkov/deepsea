@@ -1,5 +1,6 @@
 package global
 
+
 type Mark struct {
 	// db: Maps the "Identifier" property to the "identifier" column
 	// of the "Mark" table.

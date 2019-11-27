@@ -16,35 +16,11 @@ package main
 
 import (
 	"deepsea/cmd"
-	"deepsea/global"
 	jlog "github.com/spf13/jwalterweatherman"
-	"os"
 )
 
 func main() {
 
-	var err error
-	var logSink *os.File
-	var logFile = "deepsea.log"
-
-	jlog.SetLogThreshold(jlog.LevelInfo)
 	jlog.SetStdoutThreshold(jlog.LevelInfo)
-
-	if !global.FileExists(logFile) {
-		logSink, err = os.Create(logFile)
-		if err != nil {
-			jlog.ERROR.Printf("Log not available %v", err)
-		}
-	} else {
-		logSink, err = os.Open(logFile)
-		if err != nil {
-			jlog.ERROR.Printf("Log not available %v", err)
-		}
-	}
-	defer func() {
-		_ = logSink.Close()
-	}()
-
-	jlog.SetLogOutput(logSink)
 	cmd.Execute()
 }

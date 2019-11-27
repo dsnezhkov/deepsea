@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"os"
 	"upper.io/db.v3"
 
@@ -160,11 +160,11 @@ func loadDriver(cmd *cobra.Command, args []string) {
 			os.Exit(2)
 		}
 
-		jlog.INFO.Println("Loading Marks into DB")
+		jlog.DEBUG.Println("Loading Marks into DB")
 		ix := 1
 		for k := range marks {
 
-			jlog.INFO.Printf("[%d] Loading Mark\n", ix)
+			jlog.DEBUG.Printf("[%d] Loading Mark\n", ix)
 			if len(marks[k].Email) == 0 {
 				jlog.WARN.Println("	Mark has no email. Skip...")
 				continue
@@ -214,9 +214,9 @@ func loadDriver(cmd *cobra.Command, args []string) {
 	}
 
 	// Printing to stdout.
-	jlog.INFO.Println("-= = = = Mark Database = = = =-")
+	fmt.Println("-= = = = Mark Database = = = =-")
 	for _, mark := range marks {
-		log.Printf("%s, %s, %s, %s\n",
+		fmt.Printf("%s, %s, %s, %s\n",
 			mark.Identifier,
 			mark.Email,
 			mark.Firstname,

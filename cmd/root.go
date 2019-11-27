@@ -24,6 +24,7 @@ import (
 )
 
 var cfgFile string
+var Info bool
 var Debug bool
 var Trace bool
 
@@ -50,16 +51,20 @@ func init() {
 		&cfgFile, "config", "", "config file (required)")
 	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "v", false, "DEBUG output")
 	rootCmd.PersistentFlags().BoolVarP(&Trace, "trace", "t", false, "TRACE output")
+	rootCmd.PersistentFlags().BoolVarP(&Info, "info", "i", false, "INFO output")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	jlog.SetStdoutThreshold(jlog.LevelWarn)
+
+	if Info {
+		jlog.SetStdoutThreshold(jlog.LevelInfo)
+	}
 	if Debug {
-		jlog.SetLogThreshold(jlog.LevelDebug)
 		jlog.SetStdoutThreshold(jlog.LevelDebug)
 	}
 	if Trace {
-		jlog.SetLogThreshold(jlog.LevelTrace)
 		jlog.SetStdoutThreshold(jlog.LevelTrace)
 		jlog.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 	}
