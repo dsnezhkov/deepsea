@@ -53,4 +53,7 @@ func init() {
 
 	rootCmd.AddCommand(storageCmd)
 }
-func storageDriver(cmd *cobra.Command, args []string) {}
+func storageDriver(cmd *cobra.Command, args []string) {
+	jlog.INFO.Println("`storage` is a meta command. Please use subcommands. `-h` is for help ")
+	_ = cmd.Help()
+}

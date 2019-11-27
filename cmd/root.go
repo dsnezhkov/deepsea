@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -24,6 +24,8 @@ import (
 )
 
 var cfgFile string
+var Debug bool
+var Trace bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -31,14 +33,14 @@ var rootCmd = &cobra.Command{
 	Short: "Red Team phishing gear",
 	Long:  ` ROOT: see //dsnezhkov.github.io/deepsea...`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("If you need help with usage => `deepsea help`")
+		jlog.INFO.Println("If you need help with usage => `deepsea help`")
 	},
 }
 
 func Execute() {
+
 	if err := rootCmd.Execute(); err != nil {
-		jlog.FATAL.Printf("Execute(): Cobra.Command: %v\n", err)
-		os.Exit(2)
+		jlog.FATAL.Fatalf("Execute(): Cobra.Command: %v\n", err)
 	}
 }
 
@@ -46,10 +48,22 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(
 		&cfgFile, "config", "", "config file (required)")
+	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "v", false, "DEBUG output")
+	rootCmd.PersistentFlags().BoolVarP(&Trace, "trace", "t", false, "TRACE output")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if Debug {
+		jlog.SetLogThreshold(jlog.LevelDebug)
+		jlog.SetStdoutThreshold(jlog.LevelDebug)
+	}
+	if Trace {
+		jlog.SetLogThreshold(jlog.LevelTrace)
+		jlog.SetStdoutThreshold(jlog.LevelTrace)
+		jlog.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
+	}
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -62,13 +76,11 @@ func initConfig() {
 		}
 		os.Exit(2)
 	}
-	viper.AutomaticEnv() // read in environment variables that match
+	//viper.AutomaticEnv() // read in environment variables that match
 
-	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		jlog.DEBUG.Println("Using config file: ", viper.ConfigFileUsed())
 	} else {
-		jlog.DEBUG.Printf("Config File Use Error: %v\n", err)
-		os.Exit(2)
+		jlog.ERROR.Fatalf("Config File Use Error: %v\n", err)
 	}
 }

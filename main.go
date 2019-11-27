@@ -27,16 +27,14 @@ func main() {
 	var logSink *os.File
 	var logFile = "deepsea.log"
 
-	jlog.SetLogThreshold(jlog.LevelDebug)
-	jlog.SetStdoutThreshold(jlog.LevelDebug)
+	jlog.SetLogThreshold(jlog.LevelInfo)
+	jlog.SetStdoutThreshold(jlog.LevelInfo)
 
 	if !global.FileExists(logFile) {
-		jlog.DEBUG.Printf("Creating log %s", logFile)
 		logSink, err = os.Create(logFile)
 		if err != nil {
 			jlog.ERROR.Printf("Log not available %v", err)
 		}
-		jlog.DEBUG.Printf("Created log %s", logFile)
 	} else {
 		logSink, err = os.Open(logFile)
 		if err != nil {
