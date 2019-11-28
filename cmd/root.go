@@ -31,8 +31,8 @@ var Trace bool
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "DeepSea",
-	Short: "Red Team phishing gear",
-	Long:  `Red Team phishing gear`,
+	Short: "DeepSea: Red Team phishing gear",
+	Long:  `DeppSea: Red Team phishing gear`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jlog.INFO.Println("If you need help with usage => `deepsea help`")
 	},

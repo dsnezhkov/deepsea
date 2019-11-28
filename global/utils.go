@@ -28,7 +28,6 @@ func CSV2Json(mfile string) ([]byte, error) {
 
 	csvFile, err := os.Open(mfile)
 	if err != nil {
-		log.Printf("[Error] CSV File: %s %v\n", mfile, err)
 		return nil, err
 	}
 

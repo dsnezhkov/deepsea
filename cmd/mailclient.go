@@ -145,27 +145,6 @@ func init() {
 		"",
 		"Message Subject: header")
 
-	if err = viper.BindPFlag(
-		"mailclient.message.From",
-		mailclientCmd.Flags().Lookup("From")); err != nil {
-		_ = mailclientCmd.Help()
-		os.Exit(2)
-	}
-
-	if err = viper.BindPFlag(
-		"mailclient.message.To",
-		mailclientCmd.Flags().Lookup("To")); err != nil {
-		_ = mailclientCmd.Help()
-		os.Exit(2)
-	}
-
-	if err = viper.BindPFlag(
-		"mailclient.message.Subject",
-		mailclientCmd.Flags().Lookup("Subject")); err != nil {
-		_ = mailclientCmd.Help()
-		os.Exit(2)
-	}
-
 	// message body
 	mailclientCmd.Flags().StringVarP(
 		&BodyHTMLTemplate,
@@ -193,6 +172,26 @@ func init() {
 		os.Exit(2)
 	}
 
+	if err = viper.BindPFlag(
+		"mailclient.message.From",
+		mailclientCmd.Flags().Lookup("From")); err != nil {
+		_ = mailclientCmd.Help()
+		os.Exit(2)
+	}
+
+	if err = viper.BindPFlag(
+		"mailclient.message.To",
+		mailclientCmd.Flags().Lookup("To")); err != nil {
+		_ = mailclientCmd.Help()
+		os.Exit(2)
+	}
+
+	if err = viper.BindPFlag(
+		"mailclient.message.Subject",
+		mailclientCmd.Flags().Lookup("Subject")); err != nil {
+		_ = mailclientCmd.Help()
+		os.Exit(2)
+	}
 	rootCmd.AddCommand(mailclientCmd)
 }
 
@@ -237,6 +236,12 @@ func mailDriver(cmd *cobra.Command, args []string) {
 	Attachments = viper.GetStringSlice("mailclient.message.attach")
 	Embeds = viper.GetStringSlice("mailclient.message.embed")
 
+	if len(TLS) == 0 {
+		jlog.ERROR.Fatalln("TLS: cannot be empty.")
+	}
+	if len(Subject) == 0 {
+		jlog.ERROR.Fatalln("Subject: cannot be empty.")
+	}
 	if len(From) == 0 {
 		jlog.ERROR.Fatalln("From: cannot be empty")
 	}

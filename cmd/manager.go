@@ -96,8 +96,12 @@ func managerDriver(cmd *cobra.Command, args []string) {
 	}
 
 	jlog.DEBUG.Println("Setting DBFile link")
+	var dbFile = viper.GetString("storage.DBFile")
+	if ! global.FileExists(dbFile)  {
+		jlog.ERROR.Fatalf("Database file does not exist: %s", dbFile )
+	}
 	var settings = ql.ConnectionURL{
-		Database: viper.GetString("storage.DBFile"),
+		Database: dbFile,
 	}
 
 	sess, err := ql.Open(settings)
@@ -120,9 +124,9 @@ func managerDriver(cmd *cobra.Command, args []string) {
 			sess, markCollection.(db.Collection))
 
 	} else {
-		jlog.ERROR.Printf(
-			"Task:%s undefined. Valid options: %s\n", dt, strings.Join(optDBTaskMapKeys, "|"))
-		os.Exit(3)
+		jlog.ERROR.Fatalf(
+			"Task:%s undefined (-T). Valid options: %s\n",
+			dt, strings.Join(optDBTaskMapKeys, "|"))
 	}
 }
 

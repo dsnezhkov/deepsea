@@ -1,72 +1,147 @@
+##
+## Mail Client
+##
+## (Required) Mail Client
 mailclient:
 
+  ##
+  ## Connection
+  ##
+  ## (Required) How server connection is made
   connection:
-
-    #SMTPUser: "info"
+    ## (Required) SMTP User
+    ## Ex: SMTPUser: "info"
     SMTPUser: "XXX@outlook.com"
 
-    #SMTPServer: "smtp.gmail.com"
+    ## (Required) SMT Server
+    ## Ex: SMTPServer: "smtp.gmail.com"
     SMTPServer: "smtp.office365.com"
 
+    ## (Required) SMTP Port
+    ## Ex: SMTPPort: 465
     SMTPPort: 587
-    #SMTPPort: 465
+
+    ## (Required) Secure connection to Server ("yes"/<any>)
     TLS: "yes"
 
+  ##
+  ## Email Message
+  ##
+  ## (Required) How email message is constructed
   message:
 
-    Subject: "Here you go."
-    ## Some providers, namely MSFT does not like to relay arbitrary emails.
-    ## Make sure the "From" is your@outlook.com
-    ## Or you get: `554 5.2.0 STOREDRV.Submission.Exception:SendAsDeniedException.MapiExceptionSendAsDenied`
+    ## Required) Subject:
+    Subject: "What is the meaning of life?"
 
-    ## Google/Gmail is still ok with the following:
-    #From: "Joe B <info@xxx.org>"
+    ## (Required) From:
+    ## Some providers do not like to relay arbitrary `From` emails.
+    ## Make sure the "From" is a legitimate your@email.com
+    ## Ex. From: "info@xxxx.org" or "Name <info@xxxx.org>"
+    From: "Joe B <info@xxxx.org>"
 
-    ## Gather Marks from CSV import
-    ## This is the most common use of the marks:
-    To: "campaign1/db/deepsea.db"
+    ## (Required) To:
+    ## You can gather destination email addresses in two ways:
+    ## 1. a direct email in the configuration file (this)
+    ## 2. a list of emails from the storage (e.g. database)
+    ##  Ex. To: "xxxx@gmail.com"
+    ##  Ex. To: "/path/to/campaign.db"
+    To: "campaign.db"
 
-    ## However, you could send a direct one-off email:
-    #To: "xxxx@gmail.com"
+    ## (Optional) mark:
+    ## If a (1) direct email is used, you may need to setup additional
+    ## attributes of the mark manually. They can be used in the email
+    ## template. You can always define other template-only attributes
+    ## in the `template-data` sub-section
+    mark:
+      ## (Optional)
+      FirstName: "First"
+      ## (Optional)
+      LastName: "Last"
+      ## (Optional)
+      Identifier: "345345sdfsdf"
 
-    #mark:
-    #  FirstName: "First"
-    #  LastName: "Last"
-    #  Identifier: "345345sdfsdf"
-
-    ## We would like the email messages to have access to additional metadata
+    ## (Optional)
+    ## We would like the templates to have access to additional metadata
     template-data:
-      # This directive is used to construct `URLCustom` property exposed in the templates
-      # In previous example http://evil.com/Identifier/file is {{URLTop}}/{{IdentifierRegex Result}}
-      URLTop: "https://xxx.com"
+      dictionary:
+        key: "val"
 
+    ## (Optional) headers: Email envelope headers
+    ## Ex: Return-Receipt-To: "info@xxxx.com"
     headers:
-      Return-Receipt-To: "info@xxxx.com"
-      Disposition-Notification-To: "info@xxxx.com"
-      List-Unsubscribe: "<https://www.xxxx.com/unsubscribe?u=876>, <mailto:info@xxxx.com?subject=unsubscribe>"
-      List-Unsubscribe-Post: "List-Unsubscribe=One-Click"
 
+    ## (Required) body: email body text/html templates to
+    ## construct email message from
+    ## Templates can substitute dynamic variables (See. Template Section for details).
+    ## Emails a multipart MIME, so both text and html versions of the email are needed.
     body:
-      # Templated HTML / TEXT multipart delivery
-      # Templates can substitute dynamic vartiables (See. Template Section for details).
       html: "campaign1/message.htpl"
       text: "campaign1/message.ttpl"
 
+    ## (Optional) attach: attach files to email
     attach:
-      - "/tmp/evil_report.pdf"
+      # Format:
+      #   - "/path/evil_report1.pdf"
+      #   - "/path/evil_report2.pdf"
+
+    ## (Optional) embed: embed assets into email
+    ## This is useful to embed images vs. sourcing them in from the Internet
     embed:
-      - "campaign1/artifacts/logo_header.png"
-      - "campaign1/artifacts/logo_footer.png"
+      # Format:
+      #   - "/path/logo_header.png"
+      #   - "/path/logo_footer.png"
 
 ##
-## Storage module
+## Storage
 ##
+## (Required) How marks are stored and retrieved, management of storage
 storage:
-  DBFile: "campaign1/campaign.db"
-  load:
-    SourceFile: "campaign1/marks.csv"
-    ## Identifiers are used to track marks across the campaign. Identifiers can be of any format, as long as you can carry them in URLs as resources. For example, the URL: http://evil.com/Identifier/file can track access to a hosted payload. You could generate your own Identifiers in the CSV file. Or, you can talk DeepSea to generate unique Identifiers for each mark based on a Regex pattern. You would then need to place "<dynamic>" in place of identifier field in CSV, and use `IdentifierRegex` directive to notify the program the format of the Identifier you want to generate. If for some reason custom generation of Identifiers fail, you will get a 8 Int rand string
+  ## (Required) SQL database file, where store records
+  DBFile: "/paths/campaign.db"
 
+  ## (Required) load: loader of records from a list
+  load:
+    ## (Required) load: loader of mark records from a CSV list
+    ## <id>,email,[first name],[last name]
+    SourceFile: "/path/marks.csv"
+    ## (Required) IdentifierRegex: Identifiers are used to track marks across the campaign.
+    ## Regex is used to construct them
     IdentifierRegex: "^[a-z0-9]{8}$"
-  query:
-    DBTask: "showmarks
+
+  ## (Optional) manager: default task to run.
+  manager:
+    DBTask: "showmarks"
+
+##
+## Content
+##
+## (Optional) content: a list of tools to help with email content templating
+content:
+
+  ## Helps generate email templates by merging markdown with styling
+  generate:
+    ## [In] Markdown file with email content
+    SourceMDFile: "campaign.md"
+    ## [In] Location of styling and template to merge
+    SourceTemplateHTMLFile: "campaign.html.template"
+    ## [Out] Email message template (Phase1)
+    TargetHTMLFile: "campaign.html"
+    ## We would like the templates to have access to additional metadata at generation
+    template-data:
+      dictionary:
+        key: "val"
+
+  ## Helps inline email styling for better compatibility with destination clients
+  inline:
+    ## [In] Email message (Phase1)
+    SourceContentHTMLFile: "campaign.html"
+    ## [Out] Email message (Phase2: Ready for send)
+    TargetMailTemplateHTMLFile: "campaign.htpl"
+
+  ## Helps create multipart email from the HTML version
+  multipart:
+    # [In] Locaiton of a fully constructed HTML file ready for Email
+    SourceMailTemplateHTMLFile: "campaign.htpl"
+    # [Out] Location to save the Text version of the same
+    TargetMailTemplateTXTFile: "campaign.ttpl"
+

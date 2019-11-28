@@ -100,18 +100,25 @@ func loadDriver(cmd *cobra.Command, args []string) {
 
 	var markCollection db.Collection
 
+	var dbFile = viper.GetString("storage.DBFile")
+	if ! global.FileExists(dbFile)  {
+		jlog.ERROR.Fatalf("Database file does not exist: %s", dbFile )
+	}
+
 	var settings = ql.ConnectionURL{
 		Database: viper.GetString("storage.DBFile"),
 	}
 
 	sess, err := ql.Open(settings)
 	if err != nil {
-		jlog.ERROR.Printf("db.Open(): %q\n", err)
-		os.Exit(2)
+		jlog.ERROR.Fatalf("db.Open(): %q\n", err)
 	}
 	defer sess.Close()
 
 	markCollection = sess.Collection("mark")
+	if !markCollection.Exists() {
+		jlog.ERROR.Fatalf("Mark collection does not exist. Is mark schema loaded/table created?")
+	}
 
 	// Option A: Remove Mark table
 	if DropTable {
@@ -137,16 +144,14 @@ func loadDriver(cmd *cobra.Command, args []string) {
 		marksJson, err := global.CSV2Json(
 			viper.GetString("storage.load.SourceFile"))
 		if err != nil {
-			jlog.ERROR.Printf("Could not parse Source File CSV %v", err)
-			os.Exit(3)
+			jlog.ERROR.Fatalf("Could not parse CSV Source File: %v", err)
 		}
 		jlog.TRACE.Println(string(marksJson))
 
-		jlog.DEBUG.Println("Unmarshalling JSON into Marks")
+		jlog.DEBUG.Println("Unmarshal JSON into Marks")
 		err = json.Unmarshal(marksJson, &marks)
 		if err != nil {
-			jlog.ERROR.Println("JSON Unmarshal error:", err)
-			os.Exit(2)
+			jlog.ERROR.Fatalf("JSON Unmarshal error: %v", err)
 		}
 
 		jlog.DEBUG.Println("Loading Marks into DB")
