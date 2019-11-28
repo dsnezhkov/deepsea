@@ -12,4 +12,5 @@
 *.out
 .idea
 .c3*
-db/
+
+campaigns/
