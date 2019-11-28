@@ -28,11 +28,10 @@ import (
 var SourceContentHTMLFile string
 var TargetMailTemplateHTMLFile string
 
-// generateCmd represents the generate command
 var inlineCmd = &cobra.Command{
 	Use:   "inline",
 	Short: "Inline HTML content for emailing",
-	Long:  `INLINE: Help here`,
+	Long:  `INLINE: Inline HTML content for emailing`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jlog.TRACE.Println("inlineDriver()")
 		inlineDriver(cmd, args)

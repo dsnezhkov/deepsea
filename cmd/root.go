@@ -32,7 +32,7 @@ var Trace bool
 var rootCmd = &cobra.Command{
 	Use:   "DeepSea",
 	Short: "Red Team phishing gear",
-	Long:  ` ROOT: see //dsnezhkov.github.io/deepsea...`,
+	Long:  `Red Team phishing gear`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jlog.INFO.Println("If you need help with usage => `deepsea help`")
 	},
@@ -49,9 +49,12 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(
 		&cfgFile, "config", "", "config file (required)")
-	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "v", false, "DEBUG output")
-	rootCmd.PersistentFlags().BoolVarP(&Trace, "trace", "t", false, "TRACE output")
-	rootCmd.PersistentFlags().BoolVarP(&Info, "info", "i", false, "INFO output")
+	rootCmd.PersistentFlags().BoolVarP(
+		&Debug, "debug", "v", false, "DEBUG output")
+	rootCmd.PersistentFlags().BoolVarP(
+		&Trace, "trace", "t", false, "TRACE output")
+	rootCmd.PersistentFlags().BoolVarP(
+		&Info, "info", "i", false, "INFO output")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -76,8 +79,7 @@ func initConfig() {
 	} else {
 		jlog.ERROR.Println("Config file not provided")
 		if err := rootCmd.Help(); err != nil {
-			jlog.ERROR.Println("Error executing help()")
-			os.Exit(2)
+			jlog.ERROR.Fatalln("Error executing help()")
 		}
 		os.Exit(2)
 	}

@@ -22,13 +22,11 @@ import (
 // contentCmd represents the content command
 var contentCmd = &cobra.Command{
 	Use:   "content",
-	Short: "Manage Email Template Generation",
-	Long: `
-
-Content: A meta command used to help with generation and formatting of email content.`,
+	Short: `content generation and formatting of email templates`,
+	Long: `content generation and formatting of email templates`,
 	Run: func(cmd *cobra.Command, args []string) {
 		contentDriver(cmd, args)
-		jlog.ERROR.Println("`content` is a meta command. Try `deepsea content -h`")
+		jlog.ERROR.Println("`content` is a meta command. Try `content -h`")
 	},
 }
 

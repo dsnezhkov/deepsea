@@ -53,7 +53,7 @@ var tdata rmailer.TemplateData
 var mailclientCmd = &cobra.Command{
 	Use:   "mailclient",
 	Short: "Email a phish",
-	Long:  `Email a phish with features`,
+	Long:  `MAILCLIENT: Connect and Email a phish with features`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jlog.DEBUG.Println("mailDriver()")
 		mailDriver(cmd, args)

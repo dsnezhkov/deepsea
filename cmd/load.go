@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"upper.io/db.v3"
 
@@ -36,7 +35,7 @@ var DropTable bool
 var loadCmd = &cobra.Command{
 	Use:   "load",
 	Short: "Load Marks from a file",
-	Long:  `LOAD: Help here`,
+	Long:  `LOAD: Load Marks from a CSV file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jlog.DEBUG.Println("loadDriver()")
 		loadDriver(cmd, args)
@@ -112,30 +111,20 @@ func loadDriver(cmd *cobra.Command, args []string) {
 	}
 	defer sess.Close()
 
+	markCollection = sess.Collection("mark")
+
 	// Option A: Remove Mark table
 	if DropTable {
 		jlog.DEBUG.Printf("Dropping table Mark if exists\n")
-		_, err = sess.Exec(`DROP TABLE IF EXISTS mark`)
+		DropMarks(sess, markCollection)
+		CreateMarks(sess, markCollection)
 
-		jlog.DEBUG.Printf("Creating Marks table\n")
-		_, err = sess.Exec(`CREATE TABLE mark ( 
-			identifier string, 
-			email string,
-			firstname string,
-			lastname string )`)
+	}else{
+		// Option B: Truncate Mark table data
+		jlog.DEBUG.Printf("Selecting the mark table \n")
+		TruncateMarks(sess,markCollection)
 	}
 
-	// Option B: Truncate Mark table data
-	// Pointing to the "mark" table.
-	jlog.DEBUG.Printf("Selecting the mark table \n")
-	markCollection = sess.Collection("mark")
-
-	// Attempt to remove existing rows (if any).
-	jlog.DEBUG.Printf("Removing existing rows if any \n")
-	err = markCollection.Truncate()
-	if err != nil {
-		jlog.TRACE.Printf("Truncate(): %q\n", err)
-	}
 
 	// Marks in CSV file
 	if global.CSVFileRe.MatchString(
@@ -213,14 +202,6 @@ func loadDriver(cmd *cobra.Command, args []string) {
 		os.Exit(3)
 	}
 
-	// Printing to stdout.
-	fmt.Println("-= = = = Mark Database = = = =-")
-	for _, mark := range marks {
-		fmt.Printf("%s, %s, %s, %s\n",
-			mark.Identifier,
-			mark.Email,
-			mark.Firstname,
-			mark.Lastname,
-		)
-	}
+	jlog.INFO.Println("-= = = =  Marks = = = =-")
+	ShowMarks(sess,markCollection)
 }

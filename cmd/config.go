@@ -23,8 +23,8 @@ import (
 // configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "dump config file",
-	Long:  `Shows contents of config file`,
+	Short: "config meta command",
+	Long:  `NOT IMPLEMENTED`,
 	Run: func(cmd *cobra.Command, args []string) {
 		configDriver(cmd, args)
 	},

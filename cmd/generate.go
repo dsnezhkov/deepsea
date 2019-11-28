@@ -58,7 +58,7 @@ func (dt *DTheme) PlainTextTemplate() string {
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate HTML content from HTML template",
-	Long:  `GENERATE: Help here`,
+	Long:  `GENERATE: Generate HTML content from HTML template `,
 	Run: func(cmd *cobra.Command, args []string) {
 		jlog.DEBUG.Print("Cobra.Command: generateDriver()")
 		generateDriver(cmd, args)

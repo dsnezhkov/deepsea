@@ -33,7 +33,7 @@ var DBTask string
 var managerCmd = &cobra.Command{
 	Use:   "manager",
 	Short: "Manage information in marks database",
-	Long:  `MANAGER: Help`,
+	Long:  `MANAGER: Manage information in marks database`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jlog.DEBUG.Println("managerDriver()")
 		managerDriver(cmd, args)
@@ -41,11 +41,11 @@ var managerCmd = &cobra.Command{
 }
 
 var optDBTaskMap = map[string]interface{}{
-	"showmarks":    qShowMarks,
-	"truncate":     qTruncateMarks,
-	"droptable":    qDropMarks,
-	"createtable":  qCreateMarks,
-	"recycletable": qRecycleMarks,
+	"showmarks":    ShowMarks,
+	"truncate":     TruncateMarks,
+	"droptable":    DropMarks,
+	"createtable":  CreateMarks,
+	"recycletable": RecycleMarks,
 }
 
 func init() {
@@ -58,14 +58,14 @@ func init() {
 	managerCmd.Flags().StringVarP(
 		&DBFile,
 		"DBFile",
-		"d",
+		"D",
 		"",
 		"Path to QL DB file")
 
 	managerCmd.Flags().StringVarP(
 		&DBTask,
 		"DBTask",
-		"t",
+		"T",
 		"",
 		"Tasks to run: \n"+strings.Join(optDBTaskMapKeys, "\n"))
 
@@ -126,7 +126,7 @@ func managerDriver(cmd *cobra.Command, args []string) {
 	}
 }
 
-func qShowMarks(sess sqlbuilder.Database, markCollection db.Collection) {
+func ShowMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 	// Query for the results we've just inserted.
 	jlog.DEBUG.Printf("Querying for result : find()\n")
 	res := markCollection.Find()
@@ -139,7 +139,6 @@ func qShowMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 		jlog.ERROR.Fatalf("res.All(): %q\n", err)
 	}
 
-	jlog.INFO.Println("-= = = = Table: Marks = = = =-")
 	for _, mark := range marks {
 		fmt.Printf("%s, %s, %s, %s.\n",
 			mark.Identifier,
@@ -150,30 +149,36 @@ func qShowMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 	}
 }
 
-func qTruncateMarks(sess sqlbuilder.Database, markCollection db.Collection) {
+func TruncateMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 	jlog.INFO.Println("Removing existing rows (if any)")
 	err = markCollection.Truncate()
 	if err != nil {
-		jlog.ERROR.Fatalf("Truncate(): %q\n", err)
+		jlog.ERROR.Fatalf("Truncating data in table failed: %q\n", err)
 	}
 }
 
-func qDropMarks(sess sqlbuilder.Database, markCollection db.Collection) {
+func DropMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 	jlog.INFO.Println("Dropping table Mark if exists")
 	_, err = sess.Exec(`DROP TABLE IF EXISTS mark`)
+	if err != nil {
+		jlog.ERROR.Fatalf("Dropping table failed: %q\n", err)
+	}
 }
 
-func qCreateMarks(sess sqlbuilder.Database, markCollection db.Collection) {
+func CreateMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 	jlog.INFO.Println("Creating Marks table")
 	_, err = sess.Exec(`CREATE TABLE mark (
 			identifier string,
 			email string,
 			firstname string,
 			lastname string )`)
+	if err != nil {
+		jlog.ERROR.Fatalf("Creating table failed: %q\n", err)
+	}
 }
 
-func qRecycleMarks(sess sqlbuilder.Database, markCollection db.Collection) {
+func RecycleMarks(sess sqlbuilder.Database, markCollection db.Collection) {
 	jlog.DEBUG.Println("Recycling Marks table")
-	qDropMarks(sess, markCollection)
-	qCreateMarks(sess, markCollection)
+	DropMarks(sess, markCollection)
+	CreateMarks(sess, markCollection)
 }

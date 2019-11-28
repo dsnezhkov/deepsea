@@ -29,10 +29,11 @@ import (
 var SourceMailTemplateHTMLFile string
 var TargetMailTemplateTXTFile string
 
+
 var multipartCmd = &cobra.Command{
 	Use:   "multipart",
 	Short: "Multipart HTML->TXT content for emailing",
-	Long:  `MULTIPART: Help here`,
+	Long:  `MULTIPART: Multipart HTML->TXT content for emailing`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jlog.DEBUG.Println("multipartDriver()")
 		multipartDriver(cmd, args)

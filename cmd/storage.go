@@ -27,7 +27,7 @@ var DBFile string
 var storageCmd = &cobra.Command{
 	Use:   "storage",
 	Short: "Manage persistent record storage",
-	Long:  `STORAGE: TODO`,
+	Long:  `STORAGE: Manage data in persistent record storage `,
 	Run: func(cmd *cobra.Command, args []string) {
 		jlog.DEBUG.Println("storageDriver()")
 		storageDriver(cmd, args)
