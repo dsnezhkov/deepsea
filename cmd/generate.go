@@ -197,5 +197,6 @@ func generateDriver(cmd *cobra.Command, args []string) {
 		err = ioutil.WriteFile(viper.GetString("content.generate.TargetTXTFile"), []byte(emailTxt), 0644)
 		if err != nil {
 			log.Fatalf("Cannot save HTML file: %s\n", err)
-		}*/
+		}
+	*/
 }

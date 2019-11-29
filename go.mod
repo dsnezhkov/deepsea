@@ -20,6 +20,7 @@ require (
 	github.com/matcornic/hermes/v2 v2.0.2
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.3 // indirect
+	github.com/russross/blackfriday/v2 v2.0.1
 	github.com/severedsea/hermes v1.1.1
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/jwalterweatherman v1.0.0
