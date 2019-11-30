@@ -6,7 +6,7 @@ flexible email phishing campaigns carried out on the outside as well as on the i
 
  DeepSea Phishing          |  45 config lines is all you need ...
 :-------------------------:|:-------------------------:
- ![DeepSea](https://github.com/dsnezhkov/deepsea/blob/master/docs/images/logo.png)  |  ![DeepSea](https://github.com/dsnezhkov/deepsea/blob/master/docs/images/config.png =250x450)
+ ![DeepSea](https://github.com/dsnezhkov/deepsea/blob/master/docs/images/logo.png)  |  ![DeepSea](https://github.com/dsnezhkov/deepsea/blob/master/docs/images/config.png){:height="50%"width="50%"}
 
 
 Current Release: *v0.9* 
