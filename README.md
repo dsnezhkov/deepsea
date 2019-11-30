@@ -3,20 +3,16 @@
 
 <img src="https://github.com/dsnezhkov/deepsea/blob/master/docs/images/logo.png" width="180" height="150">
 
-DeepSea phishing gear aims to help RTOs and pentesters with the delivery of opsec-tight, 
-flexible email phishing campaigns carried out on the outside as well as on the inside of a perimeter.
 
 > 45 config lines is all you need to consistently send a decent phish ... 
 
-Here's to that
+DeepSea phishing gear aims to help RTOs and pentesters with the delivery of opsec-tight, 
+flexible email phishing campaigns carried out on the outside as well as on the inside of a perimeter.
 
-:-------------------------:
-<img src="https://github.com/dsnezhkov/deepsea/blob/master/docs/images/config.png" width="350" height="500">
+Here's to that            :          Goals                          :
+:-------------------------:-----------------------------------------:
+<img src="https://github.com/dsnezhkov/deepsea/blob/master/docs/images/config.png" width="350" height="500"> | 
 
-
-Current Release: *v0.9* 
-
-*Goals*
 - Operate with a minimal footprint deep inside enterprises (Internal phish delivery).
 - Seamlessly operate with external and internal mail providers (e.g. O365, Gmail, on-prem mail servers)
 - Quickly re-target connectivity parameters.
@@ -26,6 +22,7 @@ Current Release: *v0.9*
 - Account for various secure email communication parameters
 - Clearly separate artifacts, mark databases and content delivery for multiple (parallel or sequential) phishing campaigns.
 - Help create content with minimal dependencies. Embedded tools to support Markdown->HTML->TXT workflow.  
+|-------------------------|-----------------------------------------|
 ---
 
 ### Usage
