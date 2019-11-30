@@ -1,14 +1,13 @@
 
 ## DeepSea Phishing Gear
 
+DeepSea phishing gear aims to help RTOs and pentesters with the delivery of opsec-tight, 
+flexible email phishing campaigns carried out on the outside as well as on the inside of a perimeter.
 
  DeepSea Phishing          |  Status 
 :-------------------------:|:-------------------------:
- ![DeepSea](https://github.com/dsnezhkov/deepsea/blob/master/docs/images/logo.png)  |   
+ ![DeepSea](https://github.com/dsnezhkov/deepsea/blob/master/docs/images/logo.png)  | Current Release: *v0.9* 
 
-DeepSea phishing gear aims to help RTOs and pentesters with the delivery of opsec-tight, 
-flexible email phishing campaigns carried out on the outside as well as on the inside of a perimeter.
-Current Release: *v0.9*
 *Goals*
 - Operate with a minimal footprint deep inside enterprises (Internal phish delivery).
 - Seamlessly operate with external and internal mail providers (e.g. O365, Gmail, on-prem mail servers)
