@@ -17,10 +17,11 @@ flexible email phishing campaigns carried out on the outside as well as on the i
 - Use content templates for personalization
 - Account for various secure email communication parameters
 - Clearly separate artifacts, mark databases and content delivery for multiple (parallel or sequential) phishing campaigns.
+- Help create content with minimal dependencies. Embedded tools to support Markdown->HTML->TXT workflow.  
 ---
 
 ### Usage
-Read more [Here](https://dsnezhkov.github.io/deepsea/) 
+Read more [here](https://dsnezhkov.github.io/deepsea/) 
 
 ### Build
 
