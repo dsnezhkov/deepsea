@@ -1,12 +1,14 @@
 
 ## DeepSea Phishing Gear
 
+<img src="https://github.com/dsnezhkov/deepsea/blob/master/docs/images/logo.png" width="75%" height="75%">
+
 DeepSea phishing gear aims to help RTOs and pentesters with the delivery of opsec-tight, 
 flexible email phishing campaigns carried out on the outside as well as on the inside of a perimeter.
 
- DeepSea Phishing          |  45 config lines is all you need ...
-:-------------------------:|:-------------------------:
- ![DeepSea](https://github.com/dsnezhkov/deepsea/blob/master/docs/images/logo.png)  | <img src="https://github.com/dsnezhkov/deepsea/blob/master/docs/images/config.png" width="200" height="400">
+45 config lines is all you need ...
+:-------------------------:
+<img src="https://github.com/dsnezhkov/deepsea/blob/master/docs/images/config.png" width="200" height="400">
 
 
 Current Release: *v0.9* 
