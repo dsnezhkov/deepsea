@@ -12,9 +12,7 @@ flexible email phishing campaigns carried out on the outside as well as on the i
 
 | Here's to that          |          Goals                            |
 |-------------------------|:-----------------------------------------:|
-| <img src="https://github.com/dsnezhkov/deepsea/blob/master/docs/images/config.png" width="350" height="500"> | 
-
-- Operate with a minimal footprint deep inside enterprises (Internal phish delivery).
+| <img src="https://github.com/dsnezhkov/deepsea/blob/master/docs/images/config.png" width="350" height="500"> | - Operate with a minimal footprint deep inside enterprises (Internal phish delivery).
 - Seamlessly operate with external and internal mail providers (e.g. O365, Gmail, on-prem mail servers)
 - Quickly re-target connectivity parameters.
 - Flexibly add headers, targets, attachments
