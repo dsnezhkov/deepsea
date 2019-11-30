@@ -7,9 +7,9 @@ DeepSea phishing gear aims to help RTOs and pentesters with the delivery of opse
 flexible email phishing campaigns carried out on the outside as well as on the inside of a perimeter.
 
 > 45 config lines is all you need to consistently send a decent phish ... 
-	_Unknown_
 
-Here's to that:
+Here's to that
+
 :-------------------------:
 <img src="https://github.com/dsnezhkov/deepsea/blob/master/docs/images/config.png" width="350" height="500">
 
