@@ -15,72 +15,14 @@ go build -o deepsea main.go
 
 ```sh
 mkdir -p campaigns/campaign1
-cp conf/.deepsea.yaml  campaigns/campaign/campaign1.yaml
+cp conf/template.yaml  campaigns/campaign/campaign1.yaml
 cd campaigns/campaign1
 ```
 
-### Workspace tasks
-- edit `campaign.yaml`
+### Set Workspace tasks
+- edit `campaign.yaml` 
 
-```yaml
-mailclient:
-
-  connection:
-
-    SMTPUser: "user@outlook.com"
-    SMTPServer: "smtp.office365.com"
-    SMTPPort: 587
-    TLS: "yes"
-
-  message:
-
-    Subject: "Subject."
-    ## Some providers, namely MSFT does not like to relay arbitrary emails.
-    ## Make sure the "From" is your@outlook.com
-    ## Or you get: `554 5.2.0 STOREDRV.Submission.Exception:SendAsDeniedException.MapiExceptionSendAsDenied`
-
-    From: "user@outlook.com"
-    # File means we take marks from the database
-    To: "campaign.db"
-
-    ## We would like the email messages to have access to additional metadata
-    template-data:
-      # This directive is used to construct `URLCustom` property exposed in the templates
-      # In previous example http://evil.com/Identifier/file is {{URLTop}}/{{IdentifierRegex Result}}
-      URLTop: "https://example.com"
-
-    headers:
-      Return-Receipt-To: "user@outlook.com"
-      Disposition-Notification-To: "user@outlook.com"
-      List-Unsubscribe: "<https://www.microsoft.com/unsubscribe?u=876>, <mailto:user@outlook.com?subject=unsubscribe>"
-      List-Unsubscribe-Post: "List-Unsubscribe=One-Click"
-
-    body:
-      # Templated HTML / TEXT multipart delivery
-      # Templates can substitute dynamic vartiables (See. Template Section for details).
-      html: "message.htpl"
-      text: "message.ttpl"
-
-    # No attachemnts
-    attach:
-    # No img embeds
-    embed:
-
-##
-## Storage module
-##
-storage:
-  # location of the database of imported marks
-  DBFile: "campaign.db"
-  load:
-    # locations of the CSV file of marks to import into database ^^
-    SourceFile: "marks.csv"
-
-    # Generate identified based on pattern
-    IdentifierRegex: "^[a-z0-9]{8}$"
-  query:
-    DBTask: "showmarks"
-```
+See descriptions of directives in [template](https://github.com/dsnezhkov/deepsea/blob/master/conf/template.yaml)
 
 - edit marks.csv
 
@@ -90,8 +32,15 @@ ident,email,firstname,lastname
 ```
 
 #### Load Marks
-- create database 
+- load marks from CSV defined in the `yml` (creates db. schema automatically)
 
+```
+../../deepsea  --config ./campaign.yaml  storage load 
+```
+
+Alternatively, split db management tasks:
+
+- create DB
 ```sh
 ../../deepsea  --config ./campaign.yaml  storage query -d ./campaign.db -t createtable
 Using config file: ./campaign1.yaml
@@ -117,7 +66,7 @@ vobi97v7, user@gmail.com, , .
 - you can verify the marks are loaded
 
 ```sh
-../../deepsea  --config ./campaign.yaml  storage query -d ./campaign.db -t showmarks
+../../deepsea  --config ./campaign.yaml  storage manager -D ./campaign.db -T showmarks
 Using config file: ./campaign.yaml
 2019/11/18 13:22:17 Task: showmarks
 2019/11/18 13:22:17 Querying for result : find()
@@ -129,24 +78,48 @@ vobi97v7, user@gmail.com, , .
 
 #### Create Content
 
-- Get a decent HTML template
+Tow methods: templated and hand-rolled 
+##### Templated 
+1. Get a decent HTML template
     Ex: ` wget https://raw.githubusercontent.com/leemunroe/responsive-html-email-template/master/email.html`
-- write content
- 
-- 1. Inline CSS (if needed)
+2. write content
+   introduce key/value pairs from `yml`'s `template-data`/`dictonary` and interpolate in the template
+
+
+3. Inline CSS (if needed) when done with the template (.htpl)
 
 ```sh
-../../tools/dsh2inline message.html message.htpl
+../../deepsea mailclient --config ./campaign.yaml  content inline
+
 ```
 
-- 2. Create a TXT verson from the HTML version
+4. Create a TXT verson from the HTML version (.ttpl)
 
 ```sh
-../../tools/dsh2t message.htpl message.ttpl
+../../deepsea mailclient --config ./campaign.yaml  content multipart
+```
+
+##### Hand rolled. Tools
+DeepSea provides tools to help roll yourt own html. Most likely you might want to:
+- Cretate HTML snippets from Markdown for fast prototyping
+- HTML to TEXT for seeing how HTML structure looks in terminal and multipart testing
+- Inline CSS Styling for older clients
+- Multipart messages
+
+Example (MD2HTML):
+
+```sh
+../../deepsea mailclient --config ./campaign.yaml  content md2html  -M ./campaigns/campaign1.md -H ./campaigns/campaign1.html
+
+#STDOUT
+../../deepsea mailclient --config ./campaign.yaml  content md2html  -M ./campaigns/campaign1.md 
+```
+
+```sh
+../../deepsea mailclient --config ./campaign.yaml  content html2text  -K ./campaigns/campaign1.html -L ./campaigns/campaign1.txt
 ```
 
 #### Mail Campaign
-Note: We ask for interactive password on the email provider account for now.
 
 ```sh
 ../../deepsea mailclient --config ./campaign.yaml 
@@ -171,23 +144,22 @@ Enter Password:
 2019/11/18 18:14:18 -= Marks =-
 Emailing: user@gmail.com [id:vobi97v7] 
 ```
+Note: We ask for password on the email provider account interactively for now.
 
 ### Testing
 If you need to run campaign to a test emails, you can reload test marks.
 For that, just recycle the data in the marks table like so:
 
 ```sh
-../../deepsea  --config ./campaign.yaml storage query -t recycletable
+../../deepsea  --config ./campaign.yaml storage manager -T recycletable
 Using config file: ./campaign.yaml
 2019/11/18 18:39:17 Task: recycletable
 2019/11/18 18:39:17 Dropping table Mark if exists
 2019/11/18 18:39:17 Creating Marks table
 ```
 
-```sh
-../../deepsea  --config ./campaign.yaml storage query showmarks
-Using config file: ./campaign.yaml
-2019/11/18 18:39:24 Task: showmarks
-2019/11/18 18:39:24 Querying for result : find()
--= Table: Marks =-
-``` 
+- edit `marks.csv`
+- load test marks
+```
+../../deepsea  --config ./campaign.yaml storage load
+```
