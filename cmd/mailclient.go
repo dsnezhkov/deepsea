@@ -87,7 +87,7 @@ func init() {
 	mailclientCmd.Flags().StringVarP(
 		&TLS,
 		"TLS",
-		"t",
+		"l",
 		"yes",
 		"Use TLS handshake (STARTTLS)")
 
