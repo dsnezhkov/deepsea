@@ -65,6 +65,11 @@ ident,email,firstname,lastname
 ```
 
 #### Load Marks
+
+_Note:_ Manual step (TBD for resolution):
+- Create DB file: `touch campain.db`  
+
+
 - load marks from CSV (command like params shown, but could also be defined in the `yml`)
 
 ```
