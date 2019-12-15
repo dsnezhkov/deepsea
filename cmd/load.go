@@ -44,11 +44,6 @@ var loadCmd = &cobra.Command{
 
 func init() {
 
-	loadCmd.Flags().StringVarP(&DBFile,
-		"DBFile",
-		"d",
-		"",
-		"Path to QL DB file")
 
 	loadCmd.Flags().StringVarP(
 		&SourceFile,
@@ -64,13 +59,6 @@ func init() {
 		"",
 		"<dynamic> RegEx pattern")
 
-	if err = viper.BindPFlag(
-		"storage.DBFile",
-		storageCmd.Flags().Lookup("DBFile")); err != nil {
-		_ = storageCmd.Help()
-		jlog.DEBUG.Println("Setting DBFile")
-		os.Exit(2)
-	}
 
 	loadCmd.Flags().BoolVarP(&DropTable,
 		"DropTable",

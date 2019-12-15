@@ -17,7 +17,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	jlog "github.com/spf13/jwalterweatherman"
-	"github.com/spf13/viper"
+    "github.com/spf13/viper"
 	"os"
 )
 

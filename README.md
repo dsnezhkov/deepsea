@@ -38,6 +38,7 @@ export GOPATH=~/go
 git clone  https://github.com/dsnezhkov/deepsea
 cd deepsea
 
+export GO111MODULE=on
 go get
 go build -o deepsea main.go
 ```
@@ -47,7 +48,7 @@ go build -o deepsea main.go
 
 ```sh
 mkdir -p campaigns/campaign1
-cp conf/template.yaml  campaigns/campaign/campaign1.yaml
+cp conf/template.yaml campaigns/campaign1/campaign1.yaml
 cd campaigns/campaign1
 ```
 
@@ -64,17 +65,17 @@ ident,email,firstname,lastname
 ```
 
 #### Load Marks
-- load marks from CSV defined in the `yml` (creates db. schema automatically)
+- load marks from CSV (command like params shown, but could also be defined in the `yml`)
 
 ```
-../../deepsea  --config ./campaign.yaml  storage load 
+../../deepsea  --config campaign1.yaml  storage -d ./campaign.db  load -s ./marks.csv
 ```
 
 Alternatively, split db management tasks:
 
 - create DB
 ```sh
-../../deepsea  --config ./campaign.yaml  storage query -d ./campaign.db -t createtable
+../../deepsea  --config campaign1.yaml  storage  -d ./campaign.db manager  -T createtable
 Using config file: ./campaign1.yaml
 2019/11/18 13:16:16 Task: createtable
 2019/11/18 13:16:16 Creating Marks table
@@ -82,7 +83,7 @@ Using config file: ./campaign1.yaml
 - load marks from CSV 
 
 ```sh
-../../deepsea  --config ./campaign.yaml  storage load -d ./campaign.db -s ./marks.csv
+../../deepsea  --config campaign1.yaml  storage -d ./campaign.db  load -s ./marks.csv
 Using config file: ./campaign.yaml
 2019/11/18 13:21:11 Dropping table Mark if exists
 2019/11/18 13:21:11 Creating Marks table
@@ -98,7 +99,7 @@ vobi97v7, user@gmail.com, , .
 - you can verify the marks are loaded
 
 ```sh
-../../deepsea  --config ./campaign.yaml  storage manager -D ./campaign.db -T showmarks
+../../deepsea  --config ./campaign.yaml  storage  -d ./campaign.db manager  -T showmarks
 Using config file: ./campaign.yaml
 2019/11/18 13:22:17 Task: showmarks
 2019/11/18 13:22:17 Querying for result : find()

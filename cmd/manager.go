@@ -56,26 +56,11 @@ func init() {
 	}
 
 	managerCmd.Flags().StringVarP(
-		&DBFile,
-		"DBFile",
-		"D",
-		"",
-		"Path to QL DB file")
-
-	managerCmd.Flags().StringVarP(
 		&DBTask,
 		"DBTask",
 		"T",
 		"",
 		"Tasks to run: \n"+strings.Join(optDBTaskMapKeys, "\n"))
-
-	if err = viper.BindPFlag(
-		"storage.DBFile",
-		managerCmd.Flags().Lookup("DBFile")); err != nil {
-		jlog.DEBUG.Println("Setting DBFile")
-		_ = managerCmd.Help()
-		os.Exit(2)
-	}
 
 	if err = viper.BindPFlag(
 		"storage.manager.DBTask",
