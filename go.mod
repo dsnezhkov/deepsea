@@ -9,6 +9,8 @@ require (
 	github.com/PuerkitoBio/goquery v1.5.0 // indirect
 	github.com/aymerick/douceur v0.2.0
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
+	github.com/eiannone/keyboard v0.0.0-20200508000154-caf4b762e807
+	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/gophish/gomail v0.0.0-20180314010319-cf7e1a5479be
 	github.com/gorilla/css v1.0.0 // indirect
@@ -16,16 +18,19 @@ require (
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/jaytaylor/html2text v0.0.0-20190408195923-01ec452cbe43
 	github.com/lucasjones/reggen v0.0.0-20180717132126-cdb49ff09d77
-	github.com/matcornic/hermes v1.2.0
+	github.com/marcusolsson/tui-go v0.4.0
 	github.com/matcornic/hermes/v2 v2.0.2
+	github.com/mhale/smtpd v0.0.0-20200509114310-d7a07f752336
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.3 // indirect
 	github.com/russross/blackfriday/v2 v2.0.1
-	github.com/severedsea/hermes v1.1.1
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/jwalterweatherman v1.0.0
 	github.com/spf13/viper v1.5.0
 	golang.org/x/crypto v0.0.0-20191122220453-ac88ee75c92c
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 	modernc.org/b v1.0.0 // indirect
 	modernc.org/db v1.0.0 // indirect
 	modernc.org/file v1.0.0 // indirect
